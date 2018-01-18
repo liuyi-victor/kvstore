@@ -1,5 +1,6 @@
 package app_kvServer;
 
+import java.io.*;
 import java.net.BindException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -9,13 +10,25 @@ import logging.LogSetup;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
+import common.messages.*;
 
-public class clientlistener implements Runnable
+public class clientlistener extends Thread
 {
 	ServerSocket serverSocket;
+	int port;
+	public clientlistener(int serverport)
+	{
+		server = host;
+		port = serverport;
+		serverSocket = new ServerSocket(port);
+	}
+	public clientlistener(ServerSocket socket)
+	{
+		serverSocket = socket;
+	}
 	public void run()
 	{
-		if(server != null) 
+		if(serverSocket != null) 
 		{
 			while(isRunning())
 			{
@@ -37,7 +50,7 @@ public class clientlistener implements Runnable
         	logger.info("Server stopped.");
 	}
 }
-public class clienthandler implements Runnable
+public class ClientConnection implements Runnable
 {
 	private static Logger logger = Logger.getRootLogger();
 	
@@ -53,7 +66,7 @@ public class clienthandler implements Runnable
 	 * Constructs a new CientConnection object for a given TCP socket.
 	 * @param clientSocket the Socket object for the client connection.
 	 */
-	public clienthandler(Socket clientSocket) {
+	public ClientConnection(Socket clientSocket) {
 		this.clientSocket = clientSocket;
 		this.isOpen = true;
 	}
@@ -67,14 +80,14 @@ public class clienthandler implements Runnable
 			output = clientSocket.getOutputStream();
 			input = clientSocket.getInputStream();
 		
-			sendMessage(new TextMessage(
+			sendMessage(new Message(
 					"Connection to MSRG Echo server established: " 
 					+ clientSocket.getLocalAddress() + " / "
 					+ clientSocket.getLocalPort()));
 			
 			while(isOpen) {
 				try {
-					TextMessage latestMsg = receiveMessage();
+					Message latestMsg = receiveMessage();
 					sendMessage(latestMsg);
 					
 				/* connection either terminated by the client or lost due to 
@@ -107,7 +120,7 @@ public class clienthandler implements Runnable
 	 * @param msg the message that is to be sent.
 	 * @throws IOException some I/O error regarding the output stream 
 	 */
-	public void sendMessage(TextMessage msg) throws IOException {
+	public void sendMessage(Message msg) throws IOException {
 		byte[] msgBytes = msg.getMsgBytes();
 		output.write(msgBytes, 0, msgBytes.length);
 		output.flush();
@@ -118,7 +131,7 @@ public class clienthandler implements Runnable
     }
 	
 	
-	private TextMessage receiveMessage() throws IOException {
+	private Message receiveMessage() throws IOException {
 		
 		int index = 0;
 		byte[] msgBytes = null, tmp = null;
@@ -178,16 +191,15 @@ public class clienthandler implements Runnable
 		msgBytes = tmp;
 		
 		/* build final String */
-		TextMessage msg = new TextMessage(msgBytes);
+		Message msg = new Message(msgBytes);
 		logger.info("RECEIVE \t<" 
 				+ clientSocket.getInetAddress().getHostAddress() + ":" 
 				+ clientSocket.getPort() + ">: '" 
 				+ msg.getMsg().trim() + "'");
 		return msg;
     }
-	
-
 }
+
 public class KVServer implements IKVServer, Runnable {
 
 	int serverport;
@@ -195,8 +207,8 @@ public class KVServer implements IKVServer, Runnable {
 	String replacement;
 	ServerSocket server;
 
-	clientlistener listen;
-	clienthandler handler;
+	clientlistener listener;
+	ClientConnection handler;
 
 	/**
 	 * Start KV Server at given port
@@ -210,13 +222,14 @@ public class KVServer implements IKVServer, Runnable {
 	 */
 	public KVServer(int port, int cacheSize, String strategy) {
 		// TODO Auto-generated method stub
-		this.replacement = stategy;
+		this.replacement = strategy;
 		this.cache_size = cacheSize;	
 		this.serverport = port;
-
 		initializeServer();
+		//listener = new clientlistener(server);
+		//listener.start();
 	}
-
+/*
 	public void run()
 	{
 		if(server != null) 
@@ -240,7 +253,7 @@ public class KVServer implements IKVServer, Runnable {
         	}
         	logger.info("Server stopped.");
 	}
-
+*/
 	private boolean initializeServer() 
 	{
 		logger.info("Initialize server ...");
