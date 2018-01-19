@@ -1,5 +1,6 @@
 package common.messages;
 
+
 public interface KVMessage {
 	
 	public enum StatusType {
@@ -13,7 +14,6 @@ public interface KVMessage {
 		DELETE_SUCCESS, /* Delete - request successful */
 		DELETE_ERROR 	/* Delete - request successful */
 	}
-
 	/**
 	 * @return the key that is associated with this message, 
 	 * 		null if not key is associated.

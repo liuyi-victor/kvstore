@@ -9,6 +9,12 @@ public class Message implements KVMessage, Serializable
 	String value;
 	StatusType status;
 	
+	public Message(String key, String value, StatusType status)
+	{
+		this.key = key;
+		this.value = value;
+		this.status = status;
+	}
 	public String getKey()
 	{
 		return key;
@@ -21,6 +27,16 @@ public class Message implements KVMessage, Serializable
 	
 	public StatusType getStatus()
 	{
-		return KVMessage.StatusType
+		return status;
 	}
+	/*
+	private void writeObject(java.io.ObjectOutputStream stream) throws IOException
+	{
+		
+	}
+	private void readObject(java.io.ObjectInputStream stream) throws IOException, ClassNotFoundException
+	{
+		
+	}
+	*/
 }

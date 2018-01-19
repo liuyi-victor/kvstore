@@ -1,5 +1,6 @@
 package app_kvClient;
 
+import client.*;
 import client.KVCommInterface;
 
 import java.net.Socket;
@@ -7,7 +8,8 @@ import java.io.IOException;
 
 //can leave this part of the client for later until testing
 
-public class KVClient implements IKVClient {
+public class KVClient implements IKVClient 
+{
 	KVStore client;
     @Override
     public void newConnection(String hostname, int port) throws Exception{
