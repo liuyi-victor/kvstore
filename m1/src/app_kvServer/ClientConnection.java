@@ -6,7 +6,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.io.IOException;
 
-import logging.LogSetup;
+import logger.LogSetup;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
@@ -20,40 +20,65 @@ public class ClientConnection implements Runnable
 	private boolean isOpen;
 	private static final int BUFFER_SIZE = 1024;
 	private static final int DROP_SIZE = 128 * BUFFER_SIZE;
+	private static final int linecount = 3;
 	
 	private Socket clientSocket;
 	private InputStream input;
 	private OutputStream output;
-	private Database nosql;
+	private static Database nosql = new Database();
+	private ObjectInputStream readobj;
+	private ObjectOutputStream writeobj;
 
 	public ClientConnection(Socket clientSocket) {
 		this.clientSocket = clientSocket;
 		this.isOpen = true;
 	}
 	
-	private boolean handleclient(Message msg)
+	// TODO add comments
+	private boolean handleclient(Message msg, Message toclient)
 	{
 		KVMessage.StatusType type = msg.getStatus();
 		String key = msg.getKey(); 
 		String value = msg.getValue();
 		
-		boolean success;
+		int success;
 		if(type == StatusType.GET)
 		{
 				value = nosql.get(key);
 				if(value == null)
+				{
 					success = false;
+				}
 				else
+				{
 					success = true;
+				}
 		}
 		else if(type == StatusType.PUT)
 		{
 			success = nosql.put(key, value);
+			if(success > 0 && value == null)
+			{
+				toclient.status = StatusType.DELETE_SUCCESS;
+			}
+			else if(success < 0 && value == null)
+			{
+				toclient.status = StatusType.DELETE_ERROR;
+			}
+			else if(success < 0 && value != null)
+			{
+				toclient.status = StatusType.PUT_ERROR;
+			}
+			else
+			{
+				// success && value != null
+			}
 		}
 		else
 		{
-			success = false;
+			return false;
 		}
+		// TODO correct this data type misconfiguration
 		return success;
 	}
 	
@@ -62,18 +87,27 @@ public class ClientConnection implements Runnable
 		try {
 			output = clientSocket.getOutputStream();
 			input = clientSocket.getInputStream();
-		
-			sendMessage(new Message(
-					"Connection to MSRG Echo server established: " 
-					+ clientSocket.getLocalAddress() + " / "
-					+ clientSocket.getLocalPort()));
+			readobj = new ObjectInputStream(input);
+			writeobj = new ObjectOutputStream(output);
 			
 			while(isOpen) {
 				try {
-					Message latestMsg = receiveMessage();
-					sendMessage(latestMsg);
-					
-
+					try
+					{
+						Message latestMsg = (Message)readobj.readObject();//receiveMessage();
+						Message toclient = new Message();
+						handleclient(latestMsg, toclient);
+						writeobj.writeObject(toclient);//sendMessage(latestMsg);
+					}
+					catch(ClassNotFoundException notfound)
+					{
+						logger.error(notfound.getMessage());
+						return;
+					}
+					/*
+					Message toclient = new Message();
+					handleclient(latestMsg, toclient);
+					writeobj.writeObject(toclient);//sendMessage(latestMsg);*/
 				} catch (IOException ioe) {
 					logger.error("Error! Connection lost!");
 					isOpen = false;
@@ -114,11 +148,12 @@ public class ClientConnection implements Runnable
 	{
 		
 		int index = 0;
+
 		byte[] msgBytes = null, tmp = null;
 		byte[] bufferBytes = new byte[BUFFER_SIZE];
 		
 
-		byte read = (byte) input.read();	
+		byte read = (byte) input.read();
 		boolean reading = true;
 		
 //		logger.info("First Char: " + read);
@@ -127,8 +162,9 @@ public class ClientConnection implements Runnable
 //			TextMessage msg = new TextMessage("");
 //			return msg;
 //		}
-
-		while(read != 10 && read !=-1 && reading) {
+		/*
+		//parser for the message
+		while(count < linecount && read !=-1 && reading) {
 			if(index == BUFFER_SIZE) {
 				if(msgBytes == null){
 					tmp = new byte[BUFFER_SIZE];
@@ -144,7 +180,8 @@ public class ClientConnection implements Runnable
 				bufferBytes = new byte[BUFFER_SIZE];
 				index = 0;
 			} 
-			
+			if(read == 10)
+				index = index + 1;
 			bufferBytes[index] = read;
 			index++;
 			
@@ -165,8 +202,11 @@ public class ClientConnection implements Runnable
 		}
 		
 		msgBytes = tmp;
-		
-		Message msg = new Message(msgBytes);
+		*/
+
+		String msgcontent = new String(msgBytes);
+		String[] array = msgcontent.split("\n");
+		Message msg = new Message(array[0], array[1], KVMessage.StatusType.valueOf(array[2]));
 		logger.info("RECEIVE \t<" 
 				+ clientSocket.getInetAddress().getHostAddress() + ":" 
 				+ clientSocket.getPort() + ">: '" 
