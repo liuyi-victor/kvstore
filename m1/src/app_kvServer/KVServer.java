@@ -6,8 +6,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.io.IOException;
 
-import logging.LogSetup;
-
+import logger.LogSetup;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import common.messages.*;
@@ -16,9 +15,11 @@ public class KVServer implements IKVServer, Runnable {
 
 	int serverport;
 	int cache_size;
-	String replacement;
+	CacheStrategy replacement;
 	ServerSocket server;
-
+	private static Logger logger = Logger.getRootLogger();
+	private boolean running;
+	private static Database nosql = new Database();
 
 	/**
 	 * Start KV Server at given port
@@ -32,7 +33,23 @@ public class KVServer implements IKVServer, Runnable {
 	 */
 	public KVServer(int port, int cacheSize, String strategy) {
 		// TODO Auto-generated method stub
-		this.replacement = strategy;
+		switch(strategy)
+		{
+			case "None":
+				replacement = CacheStrategy.None;
+				break;
+			case "FIFO":
+				replacement = CacheStrategy.FIFO;
+				break;
+			case "LRU":
+				replacement = CacheStrategy.LRU;
+				break;
+			case "LFU":
+				replacement = CacheStrategy.LFU;
+				break;
+			default:
+				replacement = CacheStrategy.None;
+		}
 		this.cache_size = cacheSize;	
 		this.serverport = port;
 		initializeServer();
@@ -73,7 +90,7 @@ public class KVServer implements IKVServer, Runnable {
 		{
 		    this.server = new ServerSocket(this.serverport);
 		    logger.info("Server listening on port: " 
-		    		+ serverSocket.getLocalPort());    
+		    		+ this.server.getLocalPort());    
 		    return true;
 
 		} 
@@ -81,7 +98,7 @@ public class KVServer implements IKVServer, Runnable {
 		{
 			logger.error("Error! Cannot open server socket:");
 			if(e instanceof BindException){
-				logger.error("Port " + port + " is already bound!");
+				logger.error("Port " + this.serverport + " is already bound!");
 			}
 			return false;
 		}
@@ -103,7 +120,7 @@ public class KVServer implements IKVServer, Runnable {
 	@Override
     public CacheStrategy getCacheStrategy(){
 		// TODO Auto-generated method stub
-		return IKVServer.CacheStrategy.None;
+		return this.replacement;
 	}
 
 	@Override
@@ -127,12 +144,15 @@ public class KVServer implements IKVServer, Runnable {
 	@Override
     public String getKV(String key) throws Exception{
 		// TODO Auto-generated method stub
-		return "";
+		// TODO: just get from the database for now, need to add the cache check
+		
+		return nosql.get(key);
 	}
 
 	@Override
     public void putKV(String key, String value) throws Exception{
 		// TODO Auto-generated method stub
+		nosql.put(key, value);
 	}
 
 	@Override
