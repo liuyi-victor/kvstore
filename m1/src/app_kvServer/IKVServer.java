@@ -2,7 +2,7 @@ package app_kvServer;
 
 public interface IKVServer {
     public enum CacheStrategy {
-        None,
+        None,// TODO switch to upper case for consistency with getCacheStrategy
         LRU,
         LFU,
         FIFO

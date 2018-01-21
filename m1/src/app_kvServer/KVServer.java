@@ -4,6 +4,7 @@ import java.io.*;
 import java.net.BindException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Locale;
 import java.io.IOException;
 
 import logging.LogSetup;
@@ -32,6 +33,7 @@ public class KVServer implements IKVServer, Runnable {
 	 */
 	public KVServer(int port, int cacheSize, String strategy) {
 		// TODO Auto-generated method stub
+		// Will possibly need to do a check to ensure correct params are passed in
 		this.replacement = strategy;
 		this.cache_size = cacheSize;	
 		this.serverport = port;
@@ -90,7 +92,6 @@ public class KVServer implements IKVServer, Runnable {
 
 	@Override
 	public int getPort(){
-		// TODO Auto-generated method stub
 		return this.serverport;
 	}
 
@@ -102,13 +103,11 @@ public class KVServer implements IKVServer, Runnable {
 
 	@Override
     public CacheStrategy getCacheStrategy(){
-		// TODO Auto-generated method stub
-		return IKVServer.CacheStrategy.None;
+		return IKVServer.CacheStrategy.valueOf(replacement.toUpperCase(Locale.ENGLISH));
 	}
 
 	@Override
     public int getCacheSize(){
-		// TODO Auto-generated method stub
 		return cache_size;
 	}
 
@@ -124,15 +123,48 @@ public class KVServer implements IKVServer, Runnable {
 		return false;
 	}
 
+	// Helper function for checking if cache is full
+	public boolean isCacheFull() {
+		// TODO compare variable cache_size with current size
+		return false;
+	}
+	
 	@Override
     public String getKV(String key) throws Exception{
 		// TODO Auto-generated method stub
+		if(isCacheFull()) {
+			
+			// Based on cache strategy apply different method
+			switch(this.replacement) {
+				case "NONE":
+					break;
+				case "LRU":
+					break;
+				case "LFU":
+					break;
+				case "FIFO":
+					break;	
+			}
+		}
 		return "";
 	}
 
 	@Override
     public void putKV(String key, String value) throws Exception{
 		// TODO Auto-generated method stub
+		if(isCacheFull()) {
+			// Based on cache strategy apply different method
+			switch(this.replacement) {
+				case "NONE":
+					break;
+				case "LRU":
+					break;
+				case "LFU":
+					break;
+				case "FIFO":
+					break;	
+			}
+		}
 	}
 
 	@Override
@@ -152,7 +184,7 @@ public class KVServer implements IKVServer, Runnable {
 
 	@Override
     public void close(){
-		// TODO Auto-generated method stub
+		// TODO Auto-generated method stub   
 	}
 }
 
