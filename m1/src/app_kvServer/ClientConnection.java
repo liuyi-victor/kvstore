@@ -37,9 +37,12 @@ public class ClientConnection implements Runnable
 	// TODO add comments
 	private boolean handleclient(Message msg, Message toclient)
 	{
+		//TODO: ADD THE LOGGING IN THIS FUNCTION
+		
 		KVMessage.StatusType type = msg.getStatus();
 		String key = msg.getKey(); 
 		String value = msg.getValue();
+		toclient.key = key;
 		
 		int success;
 		if(type == StatusType.GET)
@@ -47,15 +50,19 @@ public class ClientConnection implements Runnable
 				value = nosql.get(key);
 				if(value == null)
 				{
-					success = false;
+					success = -1;
+					toclient.status = StatusType.GET_ERROR;
 				}
 				else
 				{
-					success = true;
+					success = 1;
+					toclient.status = StatusType.GET_SUCCESS;
 				}
+				toclient.value = value;
 		}
-		else if(type == StatusType.PUT)
+		else //(type == StatusType.PUT)
 		{
+			// insert/update/delete operation
 			success = nosql.put(key, value);
 			if(success > 0 && value == null)
 			{
@@ -72,14 +79,20 @@ public class ClientConnection implements Runnable
 			else
 			{
 				// success && value != null
+				if(success == 1)
+				{
+					toclient.status = StatusType.PUT_SUCCESS;
+				}
+				else 
+				{
+					toclient.status = StatusType.PUT_UPDATE;
+				}
 			}
 		}
+		if(success > 0)
+			return true;
 		else
-		{
 			return false;
-		}
-		// TODO correct this data type misconfiguration
-		return success;
 	}
 	
 	public void run() 
@@ -95,6 +108,10 @@ public class ClientConnection implements Runnable
 					try
 					{
 						Message latestMsg = (Message)readobj.readObject();//receiveMessage();
+						logger.info("RECEIVE \t<" 
+								+ clientSocket.getInetAddress().getHostAddress() + ":" 
+								+ clientSocket.getPort() + ">: '" 
+								+ latestMsg.getStatus()+ " "+latestMsg.key+ "'");
 						Message toclient = new Message();
 						handleclient(latestMsg, toclient);
 						writeobj.writeObject(toclient);//sendMessage(latestMsg);
@@ -131,7 +148,7 @@ public class ClientConnection implements Runnable
 		}
 	}
 	
-
+/* KEEP THESE TWO METHODS FOR NOW
 	public void sendMessage(Message msg) throws IOException 
 	{
 		byte[] msgBytes = msg.getMsgBytes();
@@ -162,47 +179,47 @@ public class ClientConnection implements Runnable
 //			TextMessage msg = new TextMessage("");
 //			return msg;
 //		}
-		/*
-		//parser for the message
-		while(count < linecount && read !=-1 && reading) {
-			if(index == BUFFER_SIZE) {
-				if(msgBytes == null){
-					tmp = new byte[BUFFER_SIZE];
-					System.arraycopy(bufferBytes, 0, tmp, 0, BUFFER_SIZE);
-				} else {
-					tmp = new byte[msgBytes.length + BUFFER_SIZE];
-					System.arraycopy(msgBytes, 0, tmp, 0, msgBytes.length);
-					System.arraycopy(bufferBytes, 0, tmp, msgBytes.length,
-							BUFFER_SIZE);
-				}
-
-				msgBytes = tmp;
-				bufferBytes = new byte[BUFFER_SIZE];
-				index = 0;
-			} 
-			if(read == 10)
-				index = index + 1;
-			bufferBytes[index] = read;
-			index++;
-			
-			if(msgBytes != null && msgBytes.length + index >= DROP_SIZE) {
-				reading = false;
-			}
-			
-			read = (byte) input.read();
-		}
+//		
+//		//parser for the message		
+//		while(count < linecount && read !=-1 && reading) {
+//			if(index == BUFFER_SIZE) {
+//				if(msgBytes == null){
+//					tmp = new byte[BUFFER_SIZE];
+//					System.arraycopy(bufferBytes, 0, tmp, 0, BUFFER_SIZE);
+//				} else {
+//					tmp = new byte[msgBytes.length + BUFFER_SIZE];
+//					System.arraycopy(msgBytes, 0, tmp, 0, msgBytes.length);
+//					System.arraycopy(bufferBytes, 0, tmp, msgBytes.length,
+//							BUFFER_SIZE);
+//				}
+//
+//				msgBytes = tmp;
+//				bufferBytes = new byte[BUFFER_SIZE];
+//				index = 0;
+//			} 
+//			if(read == 10)
+//				index = index + 1;
+//			bufferBytes[index] = read;
+//			index++;
+//			
+//			if(msgBytes != null && msgBytes.length + index >= DROP_SIZE) {
+//				reading = false;
+//			}
+//			
+//			read = (byte) input.read();
+//		}
+//		
+//		if(msgBytes == null){
+//			tmp = new byte[index];
+//			System.arraycopy(bufferBytes, 0, tmp, 0, index);
+//		} else {
+//			tmp = new byte[msgBytes.length + index];
+//			System.arraycopy(msgBytes, 0, tmp, 0, msgBytes.length);
+//			System.arraycopy(bufferBytes, 0, tmp, msgBytes.length, index);
+//		}
+//		
+//		msgBytes = tmp;
 		
-		if(msgBytes == null){
-			tmp = new byte[index];
-			System.arraycopy(bufferBytes, 0, tmp, 0, index);
-		} else {
-			tmp = new byte[msgBytes.length + index];
-			System.arraycopy(msgBytes, 0, tmp, 0, msgBytes.length);
-			System.arraycopy(bufferBytes, 0, tmp, msgBytes.length, index);
-		}
-		
-		msgBytes = tmp;
-		*/
 
 		String msgcontent = new String(msgBytes);
 		String[] array = msgcontent.split("\n");
@@ -213,4 +230,5 @@ public class ClientConnection implements Runnable
 				+ msg.getMsg().trim() + "'");
 		return msg;
     }
+    */
 }

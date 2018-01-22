@@ -1,13 +1,6 @@
 package app_kvServer;
 
 import java.io.*;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.BufferedReader;
-import java.io.DataOutputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.DataInputStream;
 import java.util.concurrent.locks.*;
 import java.nio.channels.*;
 
@@ -39,6 +32,7 @@ public class Database
 	    }
 		return hash;
 		/*
+		 * another hash function for testing
 	    long key = 0;
 	    int i;
 	    for(i = 0; i < name.length(); i++)
@@ -48,6 +42,27 @@ public class Database
 	    long index = (long)floor(fmod(hash_constant*key,1.0) * hash_length);
 	    return index;
 	    */
+	}
+	public boolean checkrecordexist(String key)
+	{
+		if(get(key) != null)
+			return true;
+		else
+			return false;
+	}
+	private File checkfileexist(String key)
+	{
+		long hash = hash_function(key);
+		String filename = path + Long.toString(hash);
+		File file = new File(filename);
+		if(file.isFile())
+		{
+			return file;
+		}
+		else
+		{
+			return null;
+		}
 	}
 	/**
 	 * Get a record from the database
@@ -98,20 +113,34 @@ public class Database
 	public String get(String key)
 	{
 		
-		long hash = hash_function(key);
-		String filename = path + Long.toString(hash);
+		//long hash = hash_function(key);
+		//String filename = path + Long.toString(hash);
 		try
 		{
-			File file = new File(filename);
-			if(file.isFile())
+			//File file = new File(filename);
+			File file = checkfileexist(key);
+			if(file != null)
 			{
 				RandomAccessFile raf = new RandomAccessFile(file, "r");
 				FileChannel channel = raf.getChannel();
 				try
 				{
 					FileLock lock = channel.lock();
-					
-					//for()	continuously looking into the file
+					entry record;
+					FileInputStream fileread = new FileInputStream(file);
+					ObjectInputStream readentry = new ObjectInputStream(fileread);
+					//ObjectOutputStream writeentry = new ObjectOutputStream(output);
+					try
+					{
+						while()	//continuously looking into the file
+						{
+							
+						}
+					}
+					catch(EOFException eofex)
+					{
+						
+					}
 					lock.release();
 				}
 				catch(IOException ex)
@@ -121,7 +150,7 @@ public class Database
 			}
 			else
 			{
-				
+				return null;
 			}
 		}
 		catch(FileNotFoundException notfound)
@@ -133,7 +162,5 @@ public class Database
 		{
 			return null;
 		}*/
-		// TODO Placeholder value
-		return "";
 	}
 }

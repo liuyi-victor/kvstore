@@ -20,6 +20,9 @@ public class KVServer implements IKVServer, Runnable {
 	private static Logger logger = Logger.getRootLogger();
 	private boolean running;
 	private static Database nosql = new Database();
+	
+	//TODO: cache structure declaration
+	//private static Cache cache = new Cache();
 
 	/**
 	 * Start KV Server at given port
@@ -119,7 +122,7 @@ public class KVServer implements IKVServer, Runnable {
 	@Override
     public String getHostname(){
 		// TODO Auto-generated method stub
-		return null;
+		return server.getInetAddress().getHostName();
 	}
 
 	@Override
@@ -136,7 +139,7 @@ public class KVServer implements IKVServer, Runnable {
 	@Override
     public boolean inStorage(String key){
 		// TODO Auto-generated method stub
-		return false;
+		return nosql.checkrecordexist(key);
 	}
 
 	@Override
