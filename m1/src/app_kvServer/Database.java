@@ -18,10 +18,15 @@ class entry implements Serializable
 public class Database 
 {
 	private ReentrantReadWriteLock lock;
-	private String path = "./storage/";
+	private final String path = "./storage/";
 	public Database()
 	{
 		lock = new ReentrantReadWriteLock(true);
+		File directory = new File(path);
+		if(directory.isDirectory())
+		{
+			boolean success = directory.mkdir();
+		}
 	}
 	private long hash_function(String name)
 	{
@@ -126,26 +131,45 @@ public class Database
 				try
 				{
 					FileLock lock = channel.lock();
-					entry record;
+					entry record = null;
 					FileInputStream fileread = new FileInputStream(file);
 					ObjectInputStream readentry = new ObjectInputStream(fileread);
 					//ObjectOutputStream writeentry = new ObjectOutputStream(output);
 					try
 					{
-						while()	//continuously looking into the file
+						while(true)	//continuously looking into the file
+						{
+							record = (entry)readentry.readObject();
+							if(record.key == key)
+							{
+								break;
+							}
+						}
+					}
+					catch(Exception ex)
+					{
+						if(ex instanceof EOFException)
+						{
+							
+						}
+						else if(ex instanceof ClassNotFoundException)
 						{
 							
 						}
 					}
-					catch(EOFException eofex)
-					{
-						
-					}
 					lock.release();
+					readentry.close();
+					fileread.close();
+					channel.close();
+					raf.close();
+					if(record != null)
+						return record.value;
+					else 
+						return null;
 				}
-				catch(IOException ex)
+				catch(IOException ioex)
 				{
-					
+					return null;
 				}
 			}
 			else
@@ -155,7 +179,7 @@ public class Database
 		}
 		catch(FileNotFoundException notfound)
 		{
-			
+			return null;
 		}
 		/*
 		else
