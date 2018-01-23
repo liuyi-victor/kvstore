@@ -10,11 +10,11 @@ public class Storage {
 	static int cacheSize;
 	private Logger logger = Logger.getRootLogger();
 	private CacheStrategy strategy;
-	
+	@Deprecated
 	public Storage() {
-		
+
 	}
-	
+	@Deprecated
 	public Storage(CacheStrategy _strategy, int _cacheSize) {
 		this.strategy = _strategy;
 		cacheSize = _cacheSize;
@@ -39,6 +39,7 @@ public class Storage {
  * @return The value associated with the key or null if not found
  * @throws Exception
  */
+	@Deprecated
 	public String getKV(String key) throws Exception {
 		String result = null;
 		
@@ -53,6 +54,7 @@ public class Storage {
 		return result;
 	}
 
+	@Deprecated
 	public void putKV(String key, String value) throws Exception {
 		if(cache != null) {
 			cache.put(key, value);
@@ -60,8 +62,6 @@ public class Storage {
 		} else {
 			nosql.put(key, value);
 		}
-		
-//		TODO add this in cache logger.info(System.currentTimeMillis()+":"+"PUT key="+key+" value=\""+value+"\"");
 	}
 
 	/**
@@ -69,6 +69,7 @@ public class Storage {
 	 * @param key
 	 * @return A boolean variable
 	 */
+	@Deprecated
 	public boolean inCache(String key) {
 		if(cache == null) {
 			return false;

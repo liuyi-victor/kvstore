@@ -17,7 +17,7 @@ public class KVServer implements IKVServer, Runnable {
 	private static Logger logger = Logger.getRootLogger();
 	private boolean running;
 	private static Database nosql = new Database();
-	private static Storage storage;
+	private static Cache cache; 
 	
 	//TODO: cache structure declaration
 	//private static Cache cache = new Cache();
@@ -33,34 +33,38 @@ public class KVServer implements IKVServer, Runnable {
 	 *           and "LFU".
 	 */
 	public KVServer(int port, int cacheSize, String strategy) {
-		// TODO Auto-generated method stub
-		switch(strategy)
-		{
-			case "None":
-				replacement = CacheStrategy.None;
-				// TODO possibly need to check for if cacheSize is 0
-				break;
-			case "FIFO":
-				replacement = CacheStrategy.FIFO;
-				break;
-			case "LRU":
-				replacement = CacheStrategy.LRU;
-				break;
-			case "LFU":
-				replacement = CacheStrategy.LFU;
-				break;
-			default:
-				replacement = CacheStrategy.None;
-		}
+		// TODO Input parameter check
 		this.cache_size = cacheSize;	
 		if(cacheSize == 0) {
 			replacement = CacheStrategy.None;
+		} else {
+			switch(strategy)
+			{
+				case "None":
+					replacement = CacheStrategy.None;
+					cache = null;
+					break;
+				case "FIFO":
+					replacement = CacheStrategy.FIFO;
+					cache = new FIFOCache(cacheSize);
+					break;
+				case "LRU":
+					replacement = CacheStrategy.LRU;
+					cache = new LRUCache(cacheSize);
+					break;
+				case "LFU":
+					replacement = CacheStrategy.LFU;
+					cache = new LFUCache(cacheSize);
+					break;
+				default:
+					replacement = CacheStrategy.None;
+					cache = null;
+					break;
+			}
 		}
+		
 		this.serverport = port;
 		initializeServer();
-		storage = new Storage(replacement,cacheSize);
-		//listener = new clientlistener(server);
-		//listener.start();
 	}
 
 	public void run()
@@ -90,7 +94,6 @@ public class KVServer implements IKVServer, Runnable {
 	}
 
 	private boolean isRunning() {
-		// TODO Auto-generated method stub
 		return running;
 	}
 
@@ -118,13 +121,11 @@ public class KVServer implements IKVServer, Runnable {
 
 	@Override
 	public int getPort(){
-		// TODO Auto-generated method stub
 		return this.serverport;
 	}
 
 	@Override
     public String getHostname(){
-		// TODO Auto-generated method stub
 		return server.getInetAddress().getHostName();
 	}
 
@@ -135,67 +136,62 @@ public class KVServer implements IKVServer, Runnable {
 
 	@Override
     public int getCacheSize(){
-		// TODO Auto-generated method stub
 		return cache_size;
 	}
 
 	@Override
     public boolean inStorage(String key){
-		// TODO Auto-generated method stub
 		return nosql.checkrecordexist(key);
 	}
 
 	@Override
     public boolean inCache(String key){
-		// TODO Auto-generated method stub
-		return storage.inCache(key);
-//		return false;
+		if(cache != null) {
+			return cache.inCache(key);
+		} else {
+			return false;
+		}
 	}
 
 	@Override
     public String getKV(String key) throws Exception{
-		// TODO Auto-generated method stub
-		// TODO: just get from the database for now, need to add the cache check
+		String result = null;
+		
 		if(inCache(key)) {
-			
+			result = cache.get(key);
 		} else {
-			// Here since key is not in cache, apply caching strategy if full
+			result = nosql.get(key);
+			if(result != null && cache != null)
+				cache.put(key, result);
 		}
-		return nosql.get(key);
+		
+		return result;
 	}
 
 	@Override
     public void putKV(String key, String value) throws Exception{
-		// TODO Auto-generated method stub
-		if(isCacheFull()) {
-			// Based on cache strategy apply different method
-			switch(this.replacement) {
-				case None:
-					break;
-				case LRU:
-					break;
-				case LFU:
-					break;
-				case FIFO:
-					break;	
-			}
+		if(cache != null) {
+			cache.put(key, value);
+		} else {
+			// If there is no cache
+			nosql.put(key, value);
+//			TODO add this in cache logger.info(System.currentTimeMillis()+":"+"PUT key="+key+" value=\""+value+"\"");
 		}
-		nosql.put(key, value);
-	}
-
-	private boolean isCacheFull() {
-		// TODO Auto-generated method stub
-		return false;
 	}
 
 	@Override
     public void clearCache(){
-		// TODO Auto-generated method stub
+		// TODO what to do for if cache is null, is there supposed to be a message?
+		if(cache != null) {
+			cache.clearCache();
+		}
 	}
 
 	@Override
     public void clearStorage(){
 		// TODO Auto-generated method stub
+		cache.clearCache();
+		nosql.clearStorage();
 	}
 
 	@Override

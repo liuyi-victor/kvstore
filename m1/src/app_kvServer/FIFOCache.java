@@ -64,4 +64,9 @@ public class FIFOCache implements Cache
 		// TODO Auto-generated method stub
 		return null;
 	}
+	@Override
+	public void clearCache() {
+		// TODO Auto-generated method stub
+		
+	}
 }
