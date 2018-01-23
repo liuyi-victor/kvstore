@@ -17,7 +17,7 @@ public class KVServer implements IKVServer, Runnable {
 	private static Logger logger = Logger.getRootLogger();
 	private boolean running;
 	private static Database nosql = new Database();
-	private static Storage store;
+	private static Storage storage;
 	
 	//TODO: cache structure declaration
 	//private static Cache cache = new Cache();
@@ -54,7 +54,7 @@ public class KVServer implements IKVServer, Runnable {
 		this.cache_size = cacheSize;	
 		this.serverport = port;
 		initializeServer();
-		store = new Storage(replacement,cacheSize);
+		storage = new Storage(replacement,cacheSize);
 		//listener = new clientlistener(server);
 		//listener.start();
 	}
@@ -144,7 +144,7 @@ public class KVServer implements IKVServer, Runnable {
 	@Override
     public boolean inCache(String key){
 		// TODO Auto-generated method stub
-		return store.inCache();
+		return storage.inCache();
 //		return false;
 	}
 

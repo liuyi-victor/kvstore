@@ -2,7 +2,12 @@ package app_kvServer;
 
 import java.io.*;
 import java.util.concurrent.locks.*;
+
+import org.apache.log4j.Logger;
+
 import java.nio.channels.*;
+
+
 
 class entry implements Serializable
 {
@@ -17,8 +22,10 @@ class entry implements Serializable
 
 public class Database 
 {
+	
 	private ReentrantReadWriteLock lock;
 	private final String path = "./storage/";
+	private Logger logger = Logger.getRootLogger();
 	public Database()
 	{
 		lock = new ReentrantReadWriteLock(true);
@@ -48,6 +55,31 @@ public class Database
 	    return index;
 	    */
 	}
+	
+	/** 
+	 * Convert given key into ASCII and return as String
+	 * @param key
+	 * @return
+	 */
+	public String toASCII(String key) {
+		StringBuilder str = new StringBuilder();
+		char[] letters = key.toCharArray();
+		for (char ch : letters) {
+			str.append((byte)ch);
+		}
+		return str.toString();
+	}
+	
+	public String toFilename(String key) {
+		String hash = toASCII(key);
+		String filename = path + hash;
+		
+//		long hash = hash_function(key);
+//		String filename = path + Long.toString(hash);
+		
+		return filename;
+	}
+	
 	public boolean checkrecordexist(String key)
 	{
 		if(get(key) != null)
@@ -57,8 +89,7 @@ public class Database
 	}
 	private File checkfileexist(String key)
 	{
-		long hash = hash_function(key);
-		String filename = path + Long.toString(hash);
+		String filename = toFilename(key);
 		File file = new File(filename);
 		if(file.isFile())
 		{
@@ -87,7 +118,8 @@ public class Database
 	 */
 	public int put(String key, String value)
 	{
-		long hash = hash_function(key);
+//		long hash = hash_function(key);
+		String hash = toASCII(key);
 		if(value == null)
 		{
 			//delete operation
@@ -95,7 +127,7 @@ public class Database
 		}
 		else
 		{
-			
+			logger.info(System.currentTimeMillis()+":"+"Disk PUT key="+key+" value=\""+value+"\"");
 		}
 		// TODO Placeholder value
 		return 0;
@@ -117,7 +149,7 @@ public class Database
 	 */
 	public String get(String key)
 	{
-		
+		// TODO should the following be changed to throw exception instead to comply with others or use the int success variable model in LFUCache.java?
 		//long hash = hash_function(key);
 		//String filename = path + Long.toString(hash);
 		try

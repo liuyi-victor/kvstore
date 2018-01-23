@@ -25,7 +25,8 @@ public class ClientConnection implements Runnable
 	private Socket clientSocket;
 	private InputStream input;
 	private OutputStream output;
-	private static Database nosql = new Database();
+	private static Storage storage = new Storage();
+//	private static Database nosql = new Database();
 	private ObjectInputStream readobj;
 	private ObjectOutputStream writeobj;
 
@@ -35,6 +36,7 @@ public class ClientConnection implements Runnable
 	}
 	
 	// TODO add comments
+	// TODO adjust the int success variable
 	private boolean handleclient(Message msg, Message toclient)
 	{
 		//TODO: ADD THE LOGGING IN THIS FUNCTION
@@ -47,7 +49,12 @@ public class ClientConnection implements Runnable
 		int success;
 		if(type == StatusType.GET)
 		{
-				value = nosql.get(key);
+				try {
+					value = storage.getKV(key);
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 				if(value == null)
 				{
 					success = -1;
@@ -63,7 +70,9 @@ public class ClientConnection implements Runnable
 		else //(type == StatusType.PUT)
 		{
 			// insert/update/delete operation
-			success = nosql.put(key, value);
+			// TODO change below function(s) currently using 0 as placeholder
+//			success = storage.putKV(key, value);
+			success = 0;
 			if(success > 0 && value == null)
 			{
 				toclient.status = StatusType.DELETE_SUCCESS;
