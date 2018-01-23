@@ -1,11 +1,15 @@
 package app_kvServer;
 
 import java.util.*;
-class lfuentry implements Comparable<lfuentry>
+import java.util.PriorityQueue.*;
+
+import app_kvServer.Cache.CacheType;
+
+class LRUEntry implements Comparable<LRUEntry>
 {
 	int count;
 	String key, value;
-	public int compareTo(lfuentry second) 
+	public int compareTo(LRUEntry second) 
 	{
 		if(this.count < second.count)
 			return -1;
@@ -15,60 +19,36 @@ class lfuentry implements Comparable<lfuentry>
 			return 0;
 	}
 }
-class cacheline
+class LRUCacheLine
 {
 	public String value;
 	public lfuentry ptr;
 }
-public class LFUCache implements Cache
+public class LRUCache implements Cache
 {
-	PriorityQueue<lfuentry> queue;
-	HashMap<String, cacheline> cache;
+	PriorityQueue<LRUEntry> queue;
+	HashMap<String, LRUCacheLine> cache;
 	public int size;
 	CacheType type;
-	public LFUCache(int size)
+	public LRUCache(int size)
 	{
 		this.size = size;
 		type = CacheType.LFU;
-		queue = new PriorityQueue<lfuentry>(size);
-		cache = new HashMap<String, cacheline>(size);
+		queue = new PriorityQueue<LRUEntry>(size);
+		cache = new HashMap<String, LRUCacheLine>(size);
 	}
 	public Boolean inCache(String key)
 	{
-		if(cache.get(key) != null)
-			return true;
-		else
 			return false;
 	}
 	public String get(String key)
 	{
-		cacheline entry = cache.get(key);
-		if(entry != null)
-		{
-			if(queue.remove(entry.ptr))
-			{
-				entry.ptr.count++;
-				queue.offer(entry.ptr);
-			}
-			return entry.value;
-		}
-		else
+
 			return null;
 	}
 	private Boolean replacement()
 	{
-		lfuentry entry = queue.poll();
-		if(cache.remove(entry.key).value == entry.value)
-		{
-			//success
-			return true;
-		}
-		else
-		{
-			//error occurred
-			queue.offer(entry);	//add the entry back
-			return false;
-		}
+		return false;
 	}
 	@Override
 	public Boolean put(String key, String value) {

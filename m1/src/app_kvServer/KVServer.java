@@ -1,15 +1,12 @@
 package app_kvServer;
 
-import java.io.*;
 import java.net.BindException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.io.IOException;
 
-import logger.LogSetup;
-import org.apache.log4j.Level;
+
 import org.apache.log4j.Logger;
-import common.messages.*;
 
 public class KVServer implements IKVServer, Runnable {
 
@@ -20,6 +17,7 @@ public class KVServer implements IKVServer, Runnable {
 	private static Logger logger = Logger.getRootLogger();
 	private boolean running;
 	private static Database nosql = new Database();
+	private static Storage store;
 	
 	//TODO: cache structure declaration
 	//private static Cache cache = new Cache();
@@ -56,6 +54,7 @@ public class KVServer implements IKVServer, Runnable {
 		this.cache_size = cacheSize;	
 		this.serverport = port;
 		initializeServer();
+		store = new Storage(replacement,cacheSize);
 		//listener = new clientlistener(server);
 		//listener.start();
 	}
@@ -88,7 +87,7 @@ public class KVServer implements IKVServer, Runnable {
 
 	private boolean isRunning() {
 		// TODO Auto-generated method stub
-		return false;
+		return running;
 	}
 
 	private boolean initializeServer() 
@@ -145,14 +144,19 @@ public class KVServer implements IKVServer, Runnable {
 	@Override
     public boolean inCache(String key){
 		// TODO Auto-generated method stub
-		return false;
+		return store.inCache();
+//		return false;
 	}
 
 	@Override
     public String getKV(String key) throws Exception{
 		// TODO Auto-generated method stub
 		// TODO: just get from the database for now, need to add the cache check
-		
+		if(inCache(key)) {
+			
+		} else {
+			// Here since key is not in cache, apply caching strategy if full
+		}
 		return nosql.get(key);
 	}
 
