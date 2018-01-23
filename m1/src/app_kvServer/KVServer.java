@@ -38,6 +38,7 @@ public class KVServer implements IKVServer, Runnable {
 		{
 			case "None":
 				replacement = CacheStrategy.None;
+				// TODO possibly need to check for if cacheSize is 0
 				break;
 			case "FIFO":
 				replacement = CacheStrategy.FIFO;
@@ -52,6 +53,9 @@ public class KVServer implements IKVServer, Runnable {
 				replacement = CacheStrategy.None;
 		}
 		this.cache_size = cacheSize;	
+		if(cacheSize == 0) {
+			replacement = CacheStrategy.None;
+		}
 		this.serverport = port;
 		initializeServer();
 		storage = new Storage(replacement,cacheSize);
@@ -144,7 +148,7 @@ public class KVServer implements IKVServer, Runnable {
 	@Override
     public boolean inCache(String key){
 		// TODO Auto-generated method stub
-		return storage.inCache();
+		return storage.inCache(key);
 //		return false;
 	}
 

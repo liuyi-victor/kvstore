@@ -42,11 +42,11 @@ public class Storage {
 	public String getKV(String key) throws Exception {
 		String result = null;
 		
-		if(inCache()) {
+		if(inCache(key)) {
 			result = cache.get(key);
 		} else {
 			result = nosql.get(key);
-			if(result != null)
+			if(result != null && cache != null)
 				cache.put(key, result);
 		}
 		
@@ -54,12 +54,25 @@ public class Storage {
 	}
 
 	public void putKV(String key, String value) throws Exception {
-		cache.put(key, value);
-		logger.info(System.currentTimeMillis()+":"+"PUT key="+key+" value=\""+value+"\"");
+		if(cache != null) {
+			cache.put(key, value);
+			
+		} else {
+			nosql.put(key, value);
+		}
+		
+//		TODO add this in cache logger.info(System.currentTimeMillis()+":"+"PUT key="+key+" value=\""+value+"\"");
 	}
 
-	public boolean inCache() {
-		// TODO Auto-generated method stub
-		return false;
+	/**
+	 * Invoke Cache function to see if key is in cache
+	 * @param key
+	 * @return A boolean variable
+	 */
+	public boolean inCache(String key) {
+		if(cache == null) {
+			return false;
+		}
+		return cache.inCache(key);
 	}
 }
