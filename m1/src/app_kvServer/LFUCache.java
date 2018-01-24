@@ -45,9 +45,10 @@ public class LFUCache implements Cache
 		cacheline entry = cache.get(key);
 		if(entry != null)
 		{
+			// cache hit
 			if(queue.remove(entry.ptr))
 			{
-				entry.ptr.count++;
+				entry.ptr.count = entry.ptr.count + 1;
 				queue.offer(entry.ptr);
 			}
 			return entry.value;
