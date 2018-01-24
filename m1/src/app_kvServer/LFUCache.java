@@ -23,7 +23,7 @@ class cacheline
 public class LFUCache implements Cache
 {
 	PriorityQueue<lfuentry> queue;
-	HashMap<String, cacheline> cache;
+	HashMap<String, cacheline> hashmap;
 	public int size;
 	CacheType type;
 	public LFUCache(int size)
@@ -31,18 +31,19 @@ public class LFUCache implements Cache
 		this.size = size;
 		type = CacheType.LFU;
 		queue = new PriorityQueue<lfuentry>(size);
-		cache = new HashMap<String, cacheline>(size);
+		hashmap = new HashMap<String, cacheline>(size);
 	}
 	public Boolean inCache(String key)
 	{
-		if(cache.get(key) != null)
+		if(hashmap.get(key) != null)
 			return true;
 		else
 			return false;
 	}
+	
 	public String get(String key)
 	{
-		cacheline entry = cache.get(key);
+		cacheline entry = hashmap.get(key);
 		if(entry != null)
 		{
 			// cache hit
@@ -59,7 +60,7 @@ public class LFUCache implements Cache
 	private Boolean replacement()
 	{
 		lfuentry entry = queue.poll();
-		if(cache.remove(entry.key).value == entry.value)
+		if(hashmap.remove(entry.key).value == entry.value)
 		{
 			//success
 			return true;
@@ -85,5 +86,10 @@ public class LFUCache implements Cache
 	public Boolean writeback() {
 		// TODO Auto-generated method stub
 		return null;
+	}
+	@Override
+	public void clearCache() {
+		// TODO Auto-generated method stub
+		
 	}
 }

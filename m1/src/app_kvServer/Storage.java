@@ -10,11 +10,11 @@ public class Storage {
 	static int cacheSize;
 	private Logger logger = Logger.getRootLogger();
 	private CacheStrategy strategy;
-	
+	@Deprecated
 	public Storage() {
-		
+
 	}
-	
+	@Deprecated
 	public Storage(CacheStrategy _strategy, int _cacheSize) {
 		this.strategy = _strategy;
 		cacheSize = _cacheSize;
@@ -39,27 +39,41 @@ public class Storage {
  * @return The value associated with the key or null if not found
  * @throws Exception
  */
+	@Deprecated
 	public String getKV(String key) throws Exception {
 		String result = null;
 		
-		if(inCache()) {
+		if(inCache(key)) {
 			result = cache.get(key);
 		} else {
 			result = nosql.get(key);
-			if(result != null)
+			if(result != null && cache != null)
 				cache.put(key, result);
 		}
 		
 		return result;
 	}
 
+	@Deprecated
 	public void putKV(String key, String value) throws Exception {
-		cache.put(key, value);
-		logger.info(System.currentTimeMillis()+":"+"PUT key="+key+" value=\""+value+"\"");
+		if(cache != null) {
+			cache.put(key, value);
+			
+		} else {
+			nosql.put(key, value);
+		}
 	}
 
-	public boolean inCache() {
-		// TODO Auto-generated method stub
-		return false;
+	/**
+	 * Invoke Cache function to see if key is in cache
+	 * @param key
+	 * @return A boolean variable
+	 */
+	@Deprecated
+	public boolean inCache(String key) {
+		if(cache == null) {
+			return false;
+		}
+		return cache.inCache(key);
 	}
 }

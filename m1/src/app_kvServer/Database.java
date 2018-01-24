@@ -219,4 +219,8 @@ public class Database
 			return null;
 		}*/
 	}
+	
+	public void clearStorage() {
+		// TODO need implementation
+	}
 }
