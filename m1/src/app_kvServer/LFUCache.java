@@ -49,7 +49,7 @@ public class LFUCache implements Cache
 			// cache hit
 			if(queue.remove(entry.ptr))
 			{
-				entry.ptr.count = entry.ptr.count + 1;
+				entry.ptr.count = entry.ptr.count + 1; // TODO what is this?
 				queue.offer(entry.ptr);
 			}
 			return entry.value;
@@ -90,6 +90,8 @@ public class LFUCache implements Cache
 	@Override
 	public void clearCache() {
 		// TODO Auto-generated method stub
-		
+		queue.clear();
+		queue.removeAll(queue);
+		hashmap.clear();
 	}
 }
