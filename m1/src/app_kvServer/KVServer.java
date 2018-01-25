@@ -190,7 +190,7 @@ public class KVServer implements IKVServer, Runnable {
 	@Override
     public void clearStorage(){
 		// TODO Auto-generated method stub
-		cache.clearCache();
+		clearCache();
 		nosql.clearStorage();
 	}
 

@@ -328,6 +328,14 @@ public class Database
 	}
 	
 	public void clearStorage() {
-		// TODO need implementation
+		// TODO need check to ensure delete is correct
+		File directory = new File(path);
+		if(directory.listFiles().length < 10) {
+			for(File f: directory.listFiles()) {
+				if(!f.delete()) {
+					logger.error("Failed to delete file "+f+" in clearStorage()");
+				}
+			}
+		}
 	}
 }
