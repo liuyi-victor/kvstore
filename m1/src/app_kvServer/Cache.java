@@ -1,5 +1,7 @@
 package app_kvServer;
 
+import java.util.*;
+
 public interface Cache {
 	public enum CacheType {
 		FIFO,
@@ -8,6 +10,7 @@ public interface Cache {
 	}
 
 	public int a = 0;
+	//public vect
 	/**
 	 * Checks if key is in cache without causing access
 	 * @param key

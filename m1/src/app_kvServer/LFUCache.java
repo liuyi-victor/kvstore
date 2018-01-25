@@ -33,12 +33,15 @@ public class LFUCache implements Cache
 		queue = new PriorityQueue<lfuentry>(size);
 		hashmap = new HashMap<String, cacheline>(size);
 	}
-	public Boolean inCache(String key)
+	public cacheline inCache(String key)
 	{
+		/*
 		if(hashmap.get(key) != null)
 			return true;
 		else
 			return false;
+			*/
+		return hashmap.get(key);
 	}
 	
 	public String get(String key)
