@@ -39,7 +39,9 @@ public class Database
 		File directory = new File(path);
 		if(!directory.isDirectory())
 		{
-			boolean success = directory.mkdir();
+			if(!directory.mkdir()) {
+				logger.fatal("Storage directory does not exist and cannot be created!");
+			}
 		}
 	}
 	private long hash_function(String name)
@@ -94,6 +96,7 @@ public class Database
 		else
 			return false;
 	}
+	
 	/**
 	 * Input key of the entry to check if it exists as a file
 	 * @param key
@@ -208,6 +211,7 @@ public class Database
 				
 				RandomAccessFile raf = new RandomAccessFile(file, "rws"); // TODO determine if rw or rws is better
 				FileChannel channel = raf.getChannel();
+				logger.info("File write channel opened for "+file.toString());
 				try
 				{
 					FileLock lock = channel.lock();
@@ -238,6 +242,7 @@ public class Database
 						fileWrite.close();
 						channel.close();
 						raf.close();
+						logger.info("File write channel closed for "+file.toString());
 					}
 				}
 				catch(IOException ioex)
@@ -296,17 +301,19 @@ public class Database
 					Entry record = null;
 					FileInputStream fileread = new FileInputStream(file);
 					ObjectInputStream readentry = new ObjectInputStream(fileread);
+					logger.info("File read channel acquired for "+file.toString());
 					//ObjectOutputStream writeentry = new ObjectOutputStream(output);
 					try
 					{
-						while(true)	//continuously looking into the file
-						{
+//						while(true)	//continuously looking into the file
+//						{
 							record = (Entry)readentry.readObject();
-							if(record.key == key)
-							{
-								break;
-							}
-						}
+							logger.info(System.currentTimeMillis()+":"+"Disk GET key="+record.key+" value=\""+record.value+"\"");
+//							if(record.key == key)
+//							{
+//								break;
+//							}
+//						}
 					}
 					catch(Exception ex)
 					{
@@ -326,6 +333,7 @@ public class Database
 						fileread.close();
 						channel.close();
 						raf.close();
+						logger.info("File read channel released for "+file.toString());
 					}
 					if(record != null)
 						return record.value;
@@ -362,6 +370,7 @@ public class Database
 					logger.error("Failed to delete file "+f+" in clearStorage()");
 				}
 			}
+			logger.error(System.currentTimeMillis()+":"+"Storage cleared.");
 		}
 	}
 }
