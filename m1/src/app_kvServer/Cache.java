@@ -15,7 +15,7 @@ public interface Cache {
 	 */
 	public Boolean inCache(String key);
 	public String get(String key);
-	public Boolean put(String key, String value);
+	public void put(String key, String value);
 	public Boolean flush();
 	public Boolean writeback();
 	public void clearCache();

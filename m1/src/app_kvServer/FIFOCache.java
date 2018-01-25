@@ -55,7 +55,7 @@ public class FIFOCache implements Cache
 			return false;
 	}
 	@Override
-	public Boolean put(String key, String value) {
+	public void put(String key, String value) {
 		// TODO Auto-generated method stub
 		FIFOEntry entry;
 		for(int i = 0; i < queue.size(); i++)
@@ -64,7 +64,6 @@ public class FIFOCache implements Cache
 			if(entry.key == key)
 				entry.value = value;
 		}
-		return null;
 	}
 	@Override
 	public Boolean flush() {

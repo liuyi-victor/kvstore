@@ -97,12 +97,11 @@ public class LFUCache implements Cache
 		}
 	}
 	@Override
-	public Boolean put(String key, String value) {
+	public void put(String key, String value) {
 		// TODO Auto-generated method stub
 		if(inCache(key)) {
 			
 		}
-		return null;
 	}
 	@Override
 	public Boolean flush() {

@@ -1,7 +1,14 @@
+/*
+ * LRU cache referenced code by StackOverflow user 'liarspocker' and 'Ciro Santilli'
+ * https://stackoverflow.com/questions/23772102/lru-cache-in-java-with-generics-and-o1-operations
+ */
+
 package app_kvServer;
 
 import java.util.*;
 import java.util.PriorityQueue.*;
+
+import org.apache.log4j.Logger;
 
 import app_kvServer.Cache.CacheType;
 
@@ -19,42 +26,75 @@ class LRUEntry implements Comparable<LRUEntry>
 			return 0;
 	}
 }
-class LRUCacheLine
-{
-	public String value;
-	public lfuentry ptr;
+
+class Node<T, U> {
+    Node<T, U> previous;
+    Node<T, U> next;
+    T key;
+    U value;
+
+    public Node(Node<T, U> previous, Node<T, U> next, T key, U value){
+        this.previous = previous;
+        this.next = next;
+        this.key = key;
+        this.value = value;
+    }
 }
+
 public class LRUCache implements Cache
 {
 	PriorityQueue<LRUEntry> queue;
-	HashMap<String, LRUCacheLine> cache;
-	public int size;
+//	HashMap<String, Node<String, String>> cache;
+	LinkedHashMap<String,String> cache;
+	Node<String, String> leastRecentlyUsed = new Node<String, String>(null,null,null,null);
+	Node<String, String> mostRecentlyUsed = leastRecentlyUsed;
+	
+	Logger logger = Logger.getRootLogger();
+	
+	public int maxSize;
 	CacheType type;
 	public LRUCache(int size)
 	{
-		this.size = size;
+		this.maxSize = size;
 		type = CacheType.LFU;
 		queue = new PriorityQueue<LRUEntry>(size);
-		cache = new HashMap<String, LRUCacheLine>(size);
+//		cache = new HashMap<String, Node<String, String>>(size);
+		cache = new LinkedHashMap<String, String>(){
+			@Override
+			protected boolean removeEldestEntry(Map.Entry<String,String> eldest) {
+				return size() > maxSize ;
+				
+			}
+		};
 	}
+	
 	public Boolean inCache(String key)
 	{
-			return false;
+		return cache.containsKey(key);
 	}
+	
 	public String get(String key)
 	{
-
-			return null;
+		String result = cache.get(key);
+		String value;
+		if(result != null) {
+			// Refresh access of hashmap
+			value = cache.remove(key);
+			cache.put(key, value);
+		}
+		
+		// TODO possibly add the call to db here
+		return result;
 	}
-	private Boolean replacement()
-	{
-		return false;
-	}
+	
 	@Override
-	public Boolean put(String key, String value) {
-		// TODO Auto-generated method stub
-		return null;
+	public void put(String key, String value) {
+        if (cache.containsKey(key)) {
+        		cache.remove(key);
+        }
+        cache.put(key, value);
 	}
+	
 	@Override
 	public Boolean flush() {
 		// TODO Auto-generated method stub
@@ -67,7 +107,6 @@ public class LRUCache implements Cache
 	}
 	@Override
 	public void clearCache() {
-		// TODO Auto-generated method stub
 		
 	}
 }
