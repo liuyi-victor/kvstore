@@ -1,6 +1,8 @@
 package app_kvServer;
 
 import java.util.*;
+
+import org.apache.log4j.Logger;
 class lfuentry implements Comparable<lfuentry>
 {
 	int count;
@@ -26,11 +28,16 @@ public class LFUCache implements Cache
 	HashMap<String, cacheline> hashmap;
 	public int size;
 	CacheType type;
+	
+	Logger logger = Logger.getRootLogger();
+	
 	public LFUCache(int size)
 	{
 		this.size = size;
 		type = CacheType.LFU;
+		// Queue ordering based on number of access
 		queue = new PriorityQueue<lfuentry>(size);
+		// Actual cache implementation of each KV entry
 		hashmap = new HashMap<String, cacheline>(size);
 	}
 	public Boolean inCache(String key)
@@ -57,6 +64,23 @@ public class LFUCache implements Cache
 		else
 			return null;
 	}
+	
+	public String getKV(String key) {
+		cacheline entry = hashmap.get(key);
+		if(entry != null)
+		{
+			// cache hit
+			if(queue.remove(entry.ptr))
+			{
+				entry.ptr.count = entry.ptr.count + 1; // TODO what is this?
+				queue.offer(entry.ptr);
+			}
+			return entry.value;
+		}
+		else
+			return null;
+	}
+	
 	private Boolean replacement()
 	{
 		lfuentry entry = queue.poll();
@@ -75,6 +99,9 @@ public class LFUCache implements Cache
 	@Override
 	public Boolean put(String key, String value) {
 		// TODO Auto-generated method stub
+		if(inCache(key)) {
+			
+		}
 		return null;
 	}
 	@Override
@@ -89,9 +116,9 @@ public class LFUCache implements Cache
 	}
 	@Override
 	public void clearCache() {
-		// TODO Auto-generated method stub
 		queue.clear();
-		queue.removeAll(queue);
+		logger.info(System.currentTimeMillis()+":"+"Cache CLEAR queue cleared");
 		hashmap.clear();
+		logger.info(System.currentTimeMillis()+":"+"Cache CLEAR hashmap cleared");
 	}
 }
