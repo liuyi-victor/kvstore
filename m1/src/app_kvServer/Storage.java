@@ -4,6 +4,7 @@ import org.apache.log4j.Logger;
 
 import app_kvServer.IKVServer.CacheStrategy;
 
+@Deprecated
 public class Storage {
 	static Cache cache;
 	static Database nosql;

@@ -6,14 +6,21 @@ import java.util.concurrent.locks.*;
 import org.apache.log4j.Logger;
 
 import java.nio.channels.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 
 
-class entry implements Serializable
+class Entry implements Serializable
 {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -6160975907797497423L;
 	String key;
 	String value;
-	public entry(String k, String v)
+	public Entry(String k, String v)
 	{
 		key = k;
 		value = v;
@@ -87,7 +94,12 @@ public class Database
 		else
 			return false;
 	}
-	private File checkfileexist(String key)
+	/**
+	 * Input key of the entry to check if it exists as a file
+	 * @param key
+	 * @return File object of the entry or null if it is a directory or doesn't exist
+	 */
+	private File checkKeyFileExist(String key)
 	{
 		String filename = toFilename(key);
 		File file = new File(filename);
@@ -119,20 +131,112 @@ public class Database
 	public int put(String key, String value)
 	{
 //		long hash = hash_function(key);
-		String hash = toASCII(key);
+//		String hash = toASCII(key);
+//		String filename = toFilename(key);
+//		Path filePath = Paths.get(path, hash);
+		
+//		File file = new File(filename);
+		
 		if(value == null)
 		{
 			//delete operation
+			boolean del;
+			try {
+//				FileChannel channel = raf.getChannel();
+//				FileLock lock = channel.lock();
+//				TODO Add some sort of lock here
+				File file = checkKeyFileExist(key);
+				del = file.delete(); // TODO change to different delete after structure change
+//				del = Files.deleteIfExists(filePath);
+			} catch (Exception e ) {
+				// TODO Auto-generated catch block
+				// If delete on null or failed, return delete failed
+				e.printStackTrace();
+				return -2;
+			} finally {
+//				TODO release the lock for the file
+			}
+			if(del) {
+				return 3;
+			} else {
+				return -2;
+			}
+			
 			
 		}
 		else
 		{
-			logger.info(System.currentTimeMillis()+":"+"Disk PUT key="+key+" value=\""+value+"\"");
+			// Insert Function
+			Entry fileContent = new Entry(key,value);
+			try {
+				boolean isModify = true;
+				File file = checkKeyFileExist(key);
+				if(file == null) {
+					file = new File(toFilename(key));
+					isModify = false;
+				}
+//				OutputStream out = Files.newOutputStream(filePath);
+//				ObjectOutputStream oos = new ObjectOutputStream(out);
+				
+//				oos.writeObject(fileContent);
+				
+				RandomAccessFile raf = new RandomAccessFile(file, "rws"); // TODO determine if rw or rws is better
+				FileChannel channel = raf.getChannel();
+				try
+				{
+					FileLock lock = channel.lock();
+					FileOutputStream fileWrite = new FileOutputStream(file);
+					ObjectOutputStream writeEntry = new ObjectOutputStream(fileWrite);
+					//ObjectOutputStream writeentry = new ObjectOutputStream(output);
+					try
+					{
+//						while(true)	// unused code for if change to different storage method
+//						{
+						writeEntry.writeObject(fileContent);
+						logger.info(System.currentTimeMillis()+":"+"Disk PUT key="+key+" value=\""+value+"\"");
+						if(isModify) {
+							return 2;
+						} else {
+							return 1;
+						}
+							
+//						}
+					}
+					catch(Exception ex)
+					{
+						return -1;
+					}
+					finally {
+						lock.release();
+						writeEntry.close();
+						fileWrite.close();
+						channel.close();
+						raf.close();
+					}
+				}
+				catch(IOException ioex)
+				{
+					return -1;
+				}
+				
+				
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				return -1;
+			}
+			
 		}
 		// TODO Placeholder value
-		return 0;
 	}
-	private boolean modify()
+	
+	/**
+	 * Possible function for improving readability to put write to file functionality in here
+	 * @param path
+	 * @param entry
+	 * @return
+	 */
+	private boolean writeToFile(Path path, Entry entry)
 	{
 		// TODO Placeholder value
 		return false;
@@ -155,7 +259,7 @@ public class Database
 		try
 		{
 			//File file = new File(filename);
-			File file = checkfileexist(key);
+			File file = checkKeyFileExist(key);
 			if(file != null)
 			{
 				RandomAccessFile raf = new RandomAccessFile(file, "r");
@@ -163,7 +267,7 @@ public class Database
 				try
 				{
 					FileLock lock = channel.lock();
-					entry record = null;
+					Entry record = null;
 					FileInputStream fileread = new FileInputStream(file);
 					ObjectInputStream readentry = new ObjectInputStream(fileread);
 					//ObjectOutputStream writeentry = new ObjectOutputStream(output);
@@ -171,7 +275,7 @@ public class Database
 					{
 						while(true)	//continuously looking into the file
 						{
-							record = (entry)readentry.readObject();
+							record = (Entry)readentry.readObject();
 							if(record.key == key)
 							{
 								break;
@@ -189,11 +293,14 @@ public class Database
 							
 						}
 					}
-					lock.release();
-					readentry.close();
-					fileread.close();
-					channel.close();
-					raf.close();
+					finally
+					{
+						lock.release();
+						readentry.close();
+						fileread.close();
+						channel.close();
+						raf.close();
+					}
 					if(record != null)
 						return record.value;
 					else 
