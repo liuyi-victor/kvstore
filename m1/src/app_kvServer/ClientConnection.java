@@ -4,6 +4,7 @@ import java.io.*;
 import java.net.BindException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.*;
 import java.io.IOException;
 
 import logger.LogSetup;
@@ -26,10 +27,12 @@ public class ClientConnection implements Runnable
 	private InputStream input;
 	private OutputStream output;
 	private static Storage storage = new Storage();
+	private static Cache cache;
 //	private static Database nosql = new Database();
 	private ObjectInputStream readobj;
 	private ObjectOutputStream writeobj;
-
+	private static Vector<String> queue;		//used as a request queue that buffers requests to the cache
+	
 	public ClientConnection(Socket clientSocket) {
 		this.clientSocket = clientSocket;
 		this.isOpen = true;

@@ -68,7 +68,7 @@ public class LRUCache implements Cache
 		};
 	}
 	
-	public Boolean inCache(String key)
+	public boolean inCache(String key)
 	{
 		return cache.containsKey(key);
 	}
@@ -96,14 +96,9 @@ public class LRUCache implements Cache
 	}
 	
 	@Override
-	public Boolean flush() {
+	public boolean writeback() {
 		// TODO Auto-generated method stub
-		return null;
-	}
-	@Override
-	public Boolean writeback() {
-		// TODO Auto-generated method stub
-		return null;
+		return false;
 	}
 	@Override
 	public void clearCache() {

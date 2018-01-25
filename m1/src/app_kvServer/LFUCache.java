@@ -40,12 +40,15 @@ public class LFUCache implements Cache
 		// Actual cache implementation of each KV entry
 		hashmap = new HashMap<String, cacheline>(size);
 	}
-	public Boolean inCache(String key)
+	public boolean inCache(String key)
 	{
+
 		if(hashmap.get(key) != null)
 			return true;
 		else
 			return false;
+			
+		//return hashmap.get(key);
 	}
 	
 	public String get(String key)
@@ -81,7 +84,7 @@ public class LFUCache implements Cache
 			return null;
 	}
 	
-	private Boolean replacement()
+	private boolean replacement()
 	{
 		lfuentry entry = queue.poll();
 		if(hashmap.remove(entry.key).value == entry.value)
@@ -99,25 +102,46 @@ public class LFUCache implements Cache
 	@Override
 	public void put(String key, String value) {
 		// TODO Auto-generated method stub
-		if(inCache(key)) {
-			
+		cacheline entry = hashmap.get(key);
+		if(value == null)
+		{
+			//delete
+			//Database delete first
+			if(entry != null)
+			{
+				queue.remove(entry.ptr);
+			}
+			hashmap.remove(key);
+		}
+		else
+		{
+			//int ret = Database.put(key, value);
+			if(entry != null)
+			{
+				//cannot be an insert
+				if(queue.remove(entry.ptr))
+				{
+					entry.ptr.count = entry.ptr.count + 1;
+					entry.value = value;
+					queue.offer(entry.ptr);
+				}
+			}
+			else
+			{
+			}
 		}
 	}
-	@Override
-	public Boolean flush() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-	@Override
-	public Boolean writeback() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+
 	@Override
 	public void clearCache() {
 		queue.clear();
 		logger.info(System.currentTimeMillis()+":"+"Cache CLEAR queue cleared");
 		hashmap.clear();
 		logger.info(System.currentTimeMillis()+":"+"Cache CLEAR hashmap cleared");
+	}
+	@Override
+	public boolean writeback() {
+		// TODO Auto-generated method stub
+		return false;
 	}
 }

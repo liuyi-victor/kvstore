@@ -102,7 +102,7 @@ public class Database
 	 * @param key
 	 * @return File object of the entry or null if it is a directory or doesn't exist
 	 */
-	private File checkKeyFileExist(String key)
+	private synchronized File checkKeyFileExist(String key)
 	{
 		String filename = toFilename(key);
 		File file = new File(filename);
@@ -114,6 +114,29 @@ public class Database
 		{
 			return null;
 		}
+	}
+	private synchronized boolean deleteFile(String key)
+	{
+		try
+		{
+			boolean success;
+			File file = checkKeyFileExist(key);
+			if(file != null)
+			{
+				success = file.delete();
+				return success;
+			}
+			else
+				return false;
+		}
+		catch(Exception ex)
+		{
+			//TODO: ADD logging here
+			return false;
+		}
+	}
+	private synchronized int insert() {
+		return -1;
 	}
 	/**
 	 * Get a record from the database
@@ -143,6 +166,7 @@ public class Database
 		if(value == null)
 		{
 			//delete operation
+			/*
 			boolean del;
 			try {
 //				FileChannel channel = raf.getChannel();
@@ -164,7 +188,11 @@ public class Database
 			} else {
 				return -2;
 			}
-			
+			*/
+			if(deleteFile(key))
+				return 3;
+			else
+				return -2;
 			
 		}
 		else
@@ -264,7 +292,8 @@ public class Database
 		try
 		{
 			//File file = new File(filename);
-			File file = checkKeyFileExist(key);
+			String filename = toFilename(key);
+			File file = new File(filename);
 			if(file != null)
 			{
 				RandomAccessFile raf = new RandomAccessFile(file, "r");

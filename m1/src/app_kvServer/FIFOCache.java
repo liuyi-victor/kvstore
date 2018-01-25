@@ -23,7 +23,7 @@ public class FIFOCache implements Cache
 		queue = new ArrayList<FIFOEntry>(size);
 		//cache = new HashMap<String, FIFOCacheLine>(size);
 	}
-	public Boolean inCache(String key)
+	public boolean inCache(String key)
 	{
 			if(get(key) != null)
 				return true;
@@ -41,14 +41,11 @@ public class FIFOCache implements Cache
 		}
 		return null;
 	}
-	private Boolean replacement()
+	private boolean replacement()
 	{
 		if(queue.size() > 0)
 		{
-			FIFOEntry evicted = queue.remove(0);
-			
-			//TODO: return the evicted entry or writeback to the database?
-			
+			FIFOEntry evicted = queue.remove(0);		
 			return true;
 		}
 		else
@@ -62,22 +59,22 @@ public class FIFOCache implements Cache
 		{
 			entry = queue.get(i);
 			if(entry.key == key)
-				entry.value = value;
+			{
+				if(value != null)
+					entry.value = value;
+				else
+					queue.remove(i);
+			}
 		}
 	}
 	@Override
-	public Boolean flush() {
+	public boolean writeback() {
 		// TODO Auto-generated method stub
-		return null;
-	}
-	@Override
-	public Boolean writeback() {
-		// TODO Auto-generated method stub
-		return null;
+		return false;
 	}
 	@Override
 	public void clearCache() {
 		// TODO Auto-generated method stub
-		
+		queue.clear();
 	}
 }
