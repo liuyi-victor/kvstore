@@ -3,17 +3,26 @@ package client;
 import common.messages.*;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.OutputStream;
+import java.net.*;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.lang.*;
 import java.lang.Exception.*;
 import org.apache.log4j.Logger;
 
 public class KVStore implements KVCommInterface {
 
-	String addr;
-	int client_port;
-	Socket client;
+	private String addr;
+	private int client_port;
+	private Socket client;
+	private InputStream fromserver;
+	private OutputStream toserver;
+	private ObjectInputStream readobj;
+	private ObjectOutputStream writeobj;
+	
 	private Logger logger = Logger.getRootLogger();
 	
 	/**
@@ -32,6 +41,8 @@ public class KVStore implements KVCommInterface {
 		// TODO Auto-generated method stub
 		
 		client = new Socket(addr, client_port);
+		fromserver = client.getInputStream();
+		toserver = client.getOutputStream();
 		/*
 		catch(UnknownHostException unknowhost)
 		{
@@ -53,6 +64,8 @@ public class KVStore implements KVCommInterface {
 		// TODO Auto-generated method stub
 		try
 		{
+			fromserver.close();
+			toserver.close();
 			client.close();
 		}
 		catch(Exception ex)
@@ -65,15 +78,42 @@ public class KVStore implements KVCommInterface {
 	public KVMessage put(String key, String value) throws Exception {
 		// TODO Auto-generated method stub
 		// sends a message to the server with the key and value pair for insertion or update
-		Message msg = new Message(key, value, KVMessage.StatusType.PUT);
-		return null;
+		if(key.length() > 20)
+		{
+			IllegalArgumentException argexception = new IllegalArgumentException("The length of the key cannot be greater than 20 bytes");
+			throw argexception;
+		}
+		ObjectOutputStream writeobj = new ObjectOutputStream(toserver);
+		ObjectInputStream readobj = new ObjectInputStream(fromserver);
+		
+		Message request = new Message(key, value, KVMessage.StatusType.PUT);
+		writeobj.writeObject(request);
+		Message reply = (Message)readobj.readObject();
+		
+		writeobj.close();
+		readobj.close();
+		
+		return reply;
 	}
 
 	@Override
 	public KVMessage get(String key) throws Exception {
 		// TODO Auto-generated method stub
 		// sends a message to the server that retrieves the value of the given key
-		Message msg = new Message(key, null, KVMessage.StatusType.GET);
-		return null;
+		
+		if(key.length() > 20)
+		{
+			IllegalArgumentException argexception = new IllegalArgumentException("The length of the key cannot be greater than 20 bytes");
+			throw argexception;
+		}
+		ObjectOutputStream writeobj = new ObjectOutputStream(toserver);
+		ObjectInputStream readobj = new ObjectInputStream(fromserver);
+		
+		Message request = new Message(key, null, KVMessage.StatusType.GET);
+		writeobj.writeObject(request);
+		Message reply = (Message)readobj.readObject();
+		writeobj.close();
+		readobj.close();
+		return reply;
 	}
 }
