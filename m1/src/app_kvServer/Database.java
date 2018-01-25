@@ -117,7 +117,6 @@ public class Database
 	}
 	private synchronized boolean deleteFile(String key)
 	{
-		
 		try
 		{
 			boolean success;
@@ -136,6 +135,7 @@ public class Database
 			return false;
 		}
 	}
+	private synchronized insert()
 	/**
 	 * Get a record from the database
 	 *
@@ -290,7 +290,8 @@ public class Database
 		try
 		{
 			//File file = new File(filename);
-			File file = checkKeyFileExist(key);
+			String filename = toFilename(key);
+			File file = new File(filename);
 			if(file != null)
 			{
 				RandomAccessFile raf = new RandomAccessFile(file, "r");

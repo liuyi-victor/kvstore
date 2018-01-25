@@ -16,10 +16,9 @@ public interface Cache {
 	 * @param key
 	 * @return Boolean result
 	 */
-	public Boolean inCache(String key);
+	public boolean inCache(String key);
 	public String get(String key);
-	public Boolean put(String key, String value);
-	public Boolean flush();
-	public Boolean writeback();
+	public boolean put(String key, String value);
+	public boolean flush();
 	public void clearCache();
 }
