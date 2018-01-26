@@ -26,8 +26,7 @@ public class ClientConnection implements Runnable
 	private Socket clientSocket;
 	private InputStream input;
 	private OutputStream output;
-	private static Storage storage = new Storage();
-	private static Cache cache;
+	private static Cache cache = new Cache();
 //	private static Database nosql = new Database();
 	private ObjectInputStream readobj;
 	private ObjectOutputStream writeobj;
