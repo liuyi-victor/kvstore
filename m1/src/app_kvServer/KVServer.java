@@ -4,7 +4,9 @@ import java.net.BindException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.io.IOException;
-
+import java.net.UnknownHostException;
+import java.lang.*;
+import java.lang.Exception.*;
 
 import org.apache.log4j.Logger;
 
@@ -14,10 +16,11 @@ public class KVServer implements IKVServer, Runnable {
 	int cache_size;
 	CacheStrategy replacement;
 	ServerSocket server;
+	private final int wellknowports = 1024;
 	private static Logger logger = Logger.getRootLogger();
 	private boolean running;
 	private static Database nosql = new Database();
-	private static Cache cache; 
+	private static Cache cache = new Cache(); 
 	
 	//TODO: cache structure declaration
 	//private static Cache cache = new Cache();
@@ -37,32 +40,34 @@ public class KVServer implements IKVServer, Runnable {
 		this.cache_size = cacheSize;	
 		if(cacheSize == 0) {
 			replacement = CacheStrategy.None;
-		} else {
+		} 
+		else 
+		{
 			switch(strategy)
 			{
-				case "None":
-					replacement = CacheStrategy.None;
-					cache = null;
-					break;
 				case "FIFO":
 					replacement = CacheStrategy.FIFO;
-					cache = new FIFOCache(cacheSize);
 					break;
 				case "LRU":
 					replacement = CacheStrategy.LRU;
-					cache = new LRUCache(cacheSize);
+					//cache = new LRUCache(cacheSize);
 					break;
 				case "LFU":
 					replacement = CacheStrategy.LFU;
-					cache = new LFUCache(cacheSize);
+					//cache = new LFUCache(cacheSize);
 					break;
-				default:
-					replacement = CacheStrategy.None;
-					cache = null;
-					break;
+//				default:
+//					replacement = CacheStrategy.None;
+//					cache = null;
+//					break;
 			}
+			cache.setType(cacheSize, replacement);
 		}
-		
+		if(port < wellknowports && port != 0)
+		{
+			IllegalArgumentException argexception = new IllegalArgumentException("Invalid server port number");
+			throw argexception;
+		}
 		this.serverport = port;
 		initializeServer();
 	}
@@ -104,7 +109,8 @@ public class KVServer implements IKVServer, Runnable {
 		{
 		    this.server = new ServerSocket(this.serverport);
 		    logger.info("Server listening on port: " 
-		    		+ this.server.getLocalPort());    
+		    		+ this.server.getLocalPort()); 
+		    this.serverport = server.getLocalPort();
 		    return true;
 
 		} 
@@ -197,10 +203,18 @@ public class KVServer implements IKVServer, Runnable {
 	@Override
     public void kill(){
 		// TODO Auto-generated method stub
+		System.exit(-1);
 	}
 
 	@Override
     public void close(){
 		// TODO Auto-generated method stub
+		running = false;
+        try {
+			server.close();
+		} catch (IOException e) {
+			logger.error("Error! " +
+					"Unable to close socket on port: " + this.serverport, e);
+		}
 	}
 }

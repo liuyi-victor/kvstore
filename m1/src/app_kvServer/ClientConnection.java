@@ -30,7 +30,7 @@ public class ClientConnection implements Runnable
 //	private static Database nosql = new Database();
 	private ObjectInputStream readobj;
 	private ObjectOutputStream writeobj;
-	private static Vector<String> queue;		//used as a request queue that buffers requests to the cache
+	//private static Vector<String> queue;		//used as a request queue that buffers requests to the cache
 	
 	public ClientConnection(Socket clientSocket) {
 		this.clientSocket = clientSocket;
@@ -52,7 +52,7 @@ public class ClientConnection implements Runnable
 		if(type == StatusType.GET)
 		{
 				try {
-					value = storage.getKV(key);
+					value = cache.get(key);
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -142,13 +142,19 @@ public class ClientConnection implements Runnable
 				}				
 			}
 			
-		} catch (IOException ioe) {
+		} 
+		catch (IOException ioe) 
+		{
 			logger.error("Error! Connection could not be established!", ioe);
-			
-		} finally {
+		} 
+		finally 
+		{
 			
 			try {
-				if (clientSocket != null) {
+				if (clientSocket != null) 
+				{
+					readobj.close();
+					writeobj.close();
 					input.close();
 					output.close();
 					clientSocket.close();
