@@ -61,15 +61,18 @@ public class KVClient implements IKVClient
 					serverAddress = tokens[1];
 					serverPort = Integer.parseInt(tokens[2]);
 					connect(serverAddress, serverPort);
-				} catch(NumberFormatException nfe) {
-					printError("No valid address. Port must be a number!");
-					logger.info("Unable to parse argument <port>", nfe);
-				} catch (UnknownHostException e) {
-					printError("Unknown Host!");
-					logger.info("Unknown Host!", e);
-				} catch (IOException e) {
-					printError("Could not establish connection!");
-					logger.warn("Could not establish connection!", e);
+				} catch(Exception e) {
+					logger.warn("Attempt to connect to server failed");
+					if(e instanceof UnknownHostException) {
+						printError("Unknown Host!");
+						logger.info("Unknown Host!", e);
+					} else if(e instanceof NumberFormatException) {
+						printError("No valid address. Port must be a number!");
+						logger.info("Unable to parse argument <port>", e);
+					} else if(e instanceof IOException) { 
+						printError("Could not establish connection!");
+						logger.warn("Could not establish connection!", e);
+					}
 				}
 			} else {
 				printError("Invalid number of parameters!");
@@ -97,32 +100,31 @@ public class KVClient implements IKVClient
 		} else if(tokens[0].equals("put")) {
 			// TODO
 			
-			if(tokens.length > 2) {
-				String key = tokens[1];
-				String value = Arrays.copyOfRange(tokens, 2, tokens.length).toString();
-				put(key,value);
+			if(tokens.length > 1) {
+				if(client != null && client.isRunning()){
+					String key = tokens[1];
+					String value;
+					if(tokens.length>2) {
+						StringBuilder msg = new StringBuilder();
+						for(int i = 2; i < tokens.length; i++) {
+							msg.append(tokens[i]);
+							if (i != tokens.length -1 ) {
+								msg.append(" ");
+							}
+						}
+						value = msg.toString();
+						System.out.println(value);
+					} else {
+						value = "";
+					}
+					put(key,value);
+				} else {
+					printError("Not connected!");
+				}
 			} else {
-				
+				printError("Message is empty!");
+				printHelp();
 			}
-//			else  if (tokens[0].equals("send")) {
-//				if(tokens.length >= 2) {
-//					if(client != null && client.isRunning()){
-//						StringBuilder msg = new StringBuilder();
-//						for(int i = 1; i < tokens.length; i++) {
-//							msg.append(tokens[i]);
-//							if (i != tokens.length -1 ) {
-//								msg.append(" ");
-//							}
-//						}	
-//						sendMessage(msg.toString());
-//					} else {
-//						printError("Not connected!");
-//					}
-//				} else {
-//					printError("No message passed!");
-//				}
-//				
-//			}
 		} else if(tokens[0].equals("get")) {
 			if(tokens.length == 2) {
 				get(tokens[1]);
@@ -185,19 +187,6 @@ public class KVClient implements IKVClient
 //		}
 	}
 
-	private void connect(String address, int port) 
-			throws UnknownHostException, IOException {
-//		client = new Client(address, port);
-//		client.addListener(this);
-//		client.start();
-	}
-	
-	private void disconnect() {
-		if(client != null) {
-			client.disconnect();
-			client = null;
-		}
-	}
 	
 	private void printHelp() {
 		StringBuilder sb = new StringBuilder();
@@ -211,6 +200,9 @@ public class KVClient implements IKVClient
 		sb.append("\t\t sends a text message to the server \n");
 		sb.append(PROMPT).append("disconnect");
 		sb.append("\t\t\t disconnects from the server \n");
+		
+		sb.append(PROMPT).append("put <key> [value]");
+		sb.append("\t\t put an entry to server or delete key if value=\"\" \n");
 		
 		sb.append(PROMPT).append("logLevel");
 		sb.append("\t\t\t changes the logLevel \n");
@@ -264,36 +256,48 @@ public class KVClient implements IKVClient
 		}
 	}
 	
-	public void handleStatus(SocketStatus status) {
-		if(status == SocketStatus.CONNECTED) {
-
-		} else if (status == SocketStatus.DISCONNECTED) {
-			System.out.print(PROMPT);
-			System.out.println("Connection terminated: " 
-					+ serverAddress + " / " + serverPort);
-			
-		} else if (status == SocketStatus.CONNECTION_LOST) {
-			System.out.println("Connection lost: " 
-					+ serverAddress + " / " + serverPort);
-			System.out.print(PROMPT);
-		}
-		
-	}
+//	public void handleStatus(SocketStatus status) {
+//		if(status == SocketStatus.CONNECTED) {
+//
+//		} else if (status == SocketStatus.DISCONNECTED) {
+//			System.out.print(PROMPT);
+//			System.out.println("Connection terminated: " 
+//					+ serverAddress + " / " + serverPort);
+//			
+//		} else if (status == SocketStatus.CONNECTION_LOST) {
+//			System.out.println("Connection lost: " 
+//					+ serverAddress + " / " + serverPort);
+//			System.out.print(PROMPT);
+//		}
+//		
+//	}
 
 	private void printError(String error){
 		System.out.println(PROMPT + "Error! " +  error);
 	}
 	
+
+	private void connect(String address, int port) throws Exception {
+		//TODO duplicate with newConnection()?
+		// TODO should the exception check be changed, then the interface declaration needs changing
+		newConnection(address,port);
+	
+	}
+	
+	private void disconnect() {
+		if(client != null) {
+			client.disconnect();
+			client = null;
+		}
+	}
+	
     @Override
     public void newConnection(String hostname, int port) throws Exception{
         // TODO Auto-generated method stub
-		try
-		{
-			client = new KVStore(hostname, port);
+		
+		client = new KVStore(hostname, port);
+		client.connect();
 			
-		}
-		catch(Exception e)
-		{
 	//	if(e.equals(obj)UnknownHostException unknowhost)
 	//	{
 	//		logger.error(unknowhost.getMessage());
@@ -306,10 +310,8 @@ public class KVClient implements IKVClient
 	//	catch(IllegalArgumentException porterror)
 	//	{
 	//		logger.error(porterror.getMessage());
-	//	}
-		
-		}
-}
+	//	}	
+    }
 
     @Override
     public KVCommInterface getStore(){
@@ -321,7 +323,7 @@ public class KVClient implements IKVClient
      * @param args contains the port number at args[0].
      */
     public static void main(String[] args) {
-    	try {
+    		try {
 			new LogSetup("logs/client.log", Level.OFF);
 			KVClient kvc = new KVClient();
 			kvc.run();
@@ -330,6 +332,7 @@ public class KVClient implements IKVClient
 			e.printStackTrace();
 			System.exit(1);
 		}
+		
     }
 }
 

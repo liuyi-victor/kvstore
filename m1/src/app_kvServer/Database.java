@@ -12,23 +12,24 @@ import java.nio.file.Paths;
 
 
 
-class Entry implements Serializable
-{
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = -6160975907797497423L;
-	String key;
-	String value;
-	public Entry(String k, String v)
-	{
-		key = k;
-		value = v;
-	}
-}
+
 
 public class Database 
 {
+	private class Entry implements Serializable
+	{
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = -6160975907797497423L;
+		String key;
+		String value;
+		public Entry(String k, String v)
+		{
+			key = k;
+			value = v;
+		}
+	}
 	
 	private ReentrantReadWriteLock lock;
 	private final String path = "./storage/";

@@ -123,7 +123,8 @@ public class ClientConnection implements Runnable
 						logger.info("RECEIVE \t<" 
 								+ clientSocket.getInetAddress().getHostAddress() + ":" 
 								+ clientSocket.getPort() + ">: '" 
-								+ latestMsg.getStatus()+ " "+latestMsg.key+ "'");
+								+ latestMsg.getStatus()+ " "+latestMsg.key+ "' "+latestMsg.value);
+						// TODO
 						Message toclient = new Message();
 						handleclient(latestMsg, toclient);
 						writeobj.writeObject(toclient);//sendMessage(latestMsg);
@@ -138,7 +139,8 @@ public class ClientConnection implements Runnable
 					handleclient(latestMsg, toclient);
 					writeobj.writeObject(toclient);//sendMessage(latestMsg);*/
 				} catch (IOException ioe) {
-					logger.error("Error! Connection lost!");
+					logger.error("Error! Connection lost in run!");
+					logger.error(ioe.getMessage());
 					isOpen = false;
 				}				
 			}

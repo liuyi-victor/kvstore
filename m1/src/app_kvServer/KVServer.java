@@ -230,6 +230,7 @@ public class KVServer implements IKVServer, Runnable {
 				} else {
 					int port = Integer.parseInt(args[0]);
 					new Thread(new KVServer(50000, 10, "FIFO")).run();
+					// TODO enable different cache strategy and ports
 				}
 			} catch (IOException e) {
 				System.out.println("Error! Unable to initialize logger!");
