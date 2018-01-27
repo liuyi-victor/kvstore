@@ -71,23 +71,50 @@ public class Cache
 	Node<String, String> mostRecentlyUsed;
 	
 	// the cache will be delegating the NoSQL database operations
-	static private Database nosql = new Database();
+	private static Database nosql = new Database();
 	
 	//public int size;
 	int capacity;
 	
 	IKVServer.CacheStrategy type;
 	Logger logger = Logger.getRootLogger();
-	/*
+	
 	public Cache()
 	{
-		// this.capacity = size;
+		
+		/*
+		//this.capacity = size;
 		
 		// Queue ordering based on number of access
 		// queue = new PriorityQueue<lfuentry>(size);
 		// Actual cache implementation of each KV entry
 		// hashmap = new HashMap<String, cacheline>(size);
-	}*/
+		this.capacity = size;
+
+		// Queue ordering based on number of access
+		queue = new PriorityQueue<lfuentry>(size);
+		// Actual cache implementation of each KV entry
+		hashmap = new HashMap<String, cacheline>(size);
+		Node<String, String> leastRecentlyUsed = new Node<String, String>(null,null,null,null);
+		Node<String, String> mostRecentlyUsed = leastRecentlyUsed;
+		cache = new LinkedHashMap<String, String>(){
+			@Override
+			protected boolean removeEldestEntry(Map.Entry<String,String> eldest) {
+				return size() > capacity ;
+				
+			}
+		};
+
+		 fifo = new LinkedHashMap<String, String>(){
+				@Override
+				protected boolean removeEldestEntry(Map.Entry<String,String> eldest) {
+					return size() > capacity ;
+					
+				}
+			};
+*/
+		
+	}
 	public void setType(int size, IKVServer.CacheStrategy strategy)
 	{
 		this.capacity = size;

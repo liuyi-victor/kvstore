@@ -19,22 +19,23 @@ public class ClientConnection implements Runnable
 	private static Logger logger = Logger.getRootLogger();
 	
 	private boolean isOpen;
-	private static final int BUFFER_SIZE = 1024;
-	private static final int DROP_SIZE = 128 * BUFFER_SIZE;
-	private static final int linecount = 3;
+	//private static final int BUFFER_SIZE = 1024;
+	//private static final int DROP_SIZE = 128 * BUFFER_SIZE;
+	//private static final int linecount = 3;
 	
 	private Socket clientSocket;
 	private InputStream input;
 	private OutputStream output;
-	private static Cache cache = new Cache();
+	private Cache cache;
 //	private static Database nosql = new Database();
 	private ObjectInputStream readobj;
 	private ObjectOutputStream writeobj;
 	//private static Vector<String> queue;		//used as a request queue that buffers requests to the cache
 	
-	public ClientConnection(Socket clientSocket) {
+	public ClientConnection(Socket clientSocket, Cache cache) {
 		this.clientSocket = clientSocket;
 		this.isOpen = true;
+		this.cache = cache; 
 	}
 	
 	// TODO add comments
@@ -74,7 +75,7 @@ public class ClientConnection implements Runnable
 			// insert/update/delete operation
 			// TODO change below function(s) currently using 0 as placeholder
 //			success = storage.putKV(key, value);
-			success = 0;
+			success = cache.put(key, value);
 			if(success > 0 && value == null)
 			{
 				toclient.status = StatusType.DELETE_SUCCESS;

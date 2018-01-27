@@ -1,5 +1,7 @@
 package app_kvServer;
 
+import org.apache.log4j.*;
+import logger.LogSetup;
 import java.net.BindException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -81,7 +83,7 @@ public class KVServer implements IKVServer, Runnable {
 			    try 
 			    {
 					Socket client = server.accept();                
-					ClientConnection connection = new ClientConnection(client);
+					ClientConnection connection = new ClientConnection(client, cache);
 					new Thread(connection).start();
 			
 					logger.info("Connected to " 
@@ -107,6 +109,7 @@ public class KVServer implements IKVServer, Runnable {
 		logger.info("Initialize server ...");
 		try 
 		{
+			running = true;
 		    this.server = new ServerSocket(this.serverport);
 		    logger.info("Server listening on port: " 
 		    		+ this.server.getLocalPort()); 
@@ -217,4 +220,25 @@ public class KVServer implements IKVServer, Runnable {
 					"Unable to close socket on port: " + this.serverport, e);
 		}
 	}
+	
+	 public static void main(String[] args) {
+	    	try {
+	    		new LogSetup("logs/server.log", Level.ALL);
+				if(args.length != 1) {
+					System.out.println("Error! Invalid number of arguments!");
+					System.out.println("Usage: Server <port>!");
+				} else {
+					int port = Integer.parseInt(args[0]);
+					new Thread(new KVServer(50000, 10, "FIFO")).run();
+				}
+			} catch (IOException e) {
+				System.out.println("Error! Unable to initialize logger!");
+				e.printStackTrace();
+				System.exit(1);
+			} catch (NumberFormatException nfe) {
+				System.out.println("Error! Invalid argument <port>! Not a number!");
+				System.out.println("Usage: Server <port>!");
+				System.exit(1);
+			}
+	    }
 }

@@ -43,6 +43,8 @@ public class KVStore implements KVCommInterface {
 		client = new Socket(addr, client_port);
 		fromserver = client.getInputStream();
 		toserver = client.getOutputStream();
+		writeobj = new ObjectOutputStream(toserver);
+		readobj = new ObjectInputStream(fromserver);
 		/*
 		catch(UnknownHostException unknowhost)
 		{
@@ -64,6 +66,8 @@ public class KVStore implements KVCommInterface {
 		// TODO Auto-generated method stub
 		try
 		{
+			writeobj.close();
+			readobj.close();
 			fromserver.close();
 			toserver.close();
 			client.close();
@@ -83,15 +87,15 @@ public class KVStore implements KVCommInterface {
 			IllegalArgumentException argexception = new IllegalArgumentException("The length of the key cannot be greater than 20 bytes");
 			throw argexception;
 		}
-		ObjectOutputStream writeobj = new ObjectOutputStream(toserver);
-		ObjectInputStream readobj = new ObjectInputStream(fromserver);
+		//writeobj = new ObjectOutputStream(toserver);
+		//readobj = new ObjectInputStream(fromserver);
 		
 		Message request = new Message(key, value, KVMessage.StatusType.PUT);
 		writeobj.writeObject(request);
 		Message reply = (Message)readobj.readObject();
 		
-		writeobj.close();
-		readobj.close();
+		//writeobj.close();
+		//readobj.close();
 		
 		return reply;
 	}
@@ -106,14 +110,14 @@ public class KVStore implements KVCommInterface {
 			IllegalArgumentException argexception = new IllegalArgumentException("The length of the key cannot be greater than 20 bytes");
 			throw argexception;
 		}
-		ObjectOutputStream writeobj = new ObjectOutputStream(toserver);
-		ObjectInputStream readobj = new ObjectInputStream(fromserver);
+		//writeobj = new ObjectOutputStream(toserver);
+		//readobj = new ObjectInputStream(fromserver);
 		
 		Message request = new Message(key, null, KVMessage.StatusType.GET);
 		writeobj.writeObject(request);
 		Message reply = (Message)readobj.readObject();
-		writeobj.close();
-		readobj.close();
+		//writeobj.close();
+		//readobj.close();
 		return reply;
 	}
 }

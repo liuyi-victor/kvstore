@@ -15,7 +15,8 @@ public class AllTests {
 	static {
 		try {
 			new LogSetup("logs/testing/test.log", Level.ERROR);
-			new KVServer(50000, 10, "FIFO");
+			new Thread(new KVServer(50000, 10, "FIFO")).run();
+			
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
