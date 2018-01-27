@@ -1,10 +1,10 @@
 package app_kvClient;
 
 import client.*;
-import client.ClientSocketListener.SocketStatus;
+import common.messages.KVMessage;
+import common.messages.KVMessage.StatusType;
 import logger.LogSetup;
 
-import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 
@@ -96,7 +96,14 @@ public class KVClient implements IKVClient
 			printHelp();
 		} else if(tokens[0].equals("put")) {
 			// TODO
-			Arrays.copyOfRange(tokens, 1, tokens.length);
+			
+			if(tokens.length > 2) {
+				String key = tokens[1];
+				String value = Arrays.copyOfRange(tokens, 2, tokens.length).toString();
+				put(key,value);
+			} else {
+				
+			}
 //			else  if (tokens[0].equals("send")) {
 //				if(tokens.length >= 2) {
 //					if(client != null && client.isRunning()){
@@ -117,7 +124,9 @@ public class KVClient implements IKVClient
 //				
 //			}
 		} else if(tokens[0].equals("get")) {
-			
+			if(tokens.length == 2) {
+				get(tokens[1]);
+			}
 		} else {
 			printError("Unknown command");
 			printHelp();
@@ -125,22 +134,54 @@ public class KVClient implements IKVClient
 	}
 	
 	// TODO add handle for get/put
-	private void put(String msg){
+	private void put(String key, String value){
+		KVMessage msg;
 		try {
-			client.put(msg,msg);
+			msg = client.put(key,value);
+			switch(msg.getStatus()) {
+			case PUT_SUCCESS:
+				System.out.println("Record {"+msg.getKey()+" , "+msg.getValue()+"} successfully put");
+				break;
+			case PUT_UPDATE:
+				System.out.println("Record {"+msg.getKey()+" , "+msg.getValue()+"} successfully updated");
+				break;
+			case PUT_ERROR:
+				System.out.println("Error in putting record!");
+				break;
+			default:
+				System.out.println("Invalid return received");
+				break;
+			}
 		} catch (Exception e) {
 			printError("Unable to send message!");
 			disconnect();
 		}
 	}
 	
-	private String get(String msg){
-		return msg;
+	private void get(String key){
+		KVMessage msg;
+		try {
+			msg = client.get(key);
+			switch(msg.getStatus()) {
+			case GET_SUCCESS:
+				System.out.println("Record {"+msg.getKey()+" , "+msg.getValue()+"}");
+				break;
+			case GET_ERROR:
+				System.out.println("Error in getting record!");
+				break;
+			default:
+				System.out.println("Invalid return received");
+				break;
+			}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			System.out.println("Error in getting record!");
+		}
+		
 //		try {
 ////			client.get(msg);
 //		} catch (IOException e) {
-//			printError("Unable to send message!");
-//			disconnect();
 //		}
 	}
 
@@ -216,9 +257,9 @@ public class KVClient implements IKVClient
 		}
 	}
 	
-	public void handleNewMessage(TextMessage msg) {
+	public void handleNewMessage(String msg) {
 		if(!stop) {
-			System.out.println(msg.getMsg());
+			System.out.println(msg);
 			System.out.print(PROMPT);
 		}
 	}
