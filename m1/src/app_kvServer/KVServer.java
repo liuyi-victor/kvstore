@@ -58,10 +58,11 @@ public class KVServer implements IKVServer, Runnable {
 					replacement = CacheStrategy.LFU;
 					//cache = new LFUCache(cacheSize);
 					break;
-//				default:
-//					replacement = CacheStrategy.None;
-//					cache = null;
-//					break;
+				default:
+					System.out.println("Error! Invalid argument <strategy>! Not a valid caching strategy. Available options are FIFO | LRU | LFU !");
+					System.out.println("Usage: Server <port> <cache_size> <strategy>!");
+					System.exit(1);
+					break;
 			}
 			cache.setType(cacheSize, replacement);
 		}
@@ -224,12 +225,14 @@ public class KVServer implements IKVServer, Runnable {
 	 public static void main(String[] args) {
 	    	try {
 	    		new LogSetup("logs/server.log", Level.ALL);
-				if(args.length != 1) {
+				if(args.length != 3) {
 					System.out.println("Error! Invalid number of arguments!");
-					System.out.println("Usage: Server <port>!");
+					System.out.println("Usage: Server <port> <cache_size> <strategy>!");
 				} else {
 					int port = Integer.parseInt(args[0]);
-					new Thread(new KVServer(50000, 10, "FIFO")).run();
+					int size = Integer.parseInt(args[1]);
+					String strategy = args[2];
+					new Thread(new KVServer(port, size, strategy)).run();
 					// TODO enable different cache strategy and ports
 				}
 			} catch (IOException e) {
@@ -237,8 +240,8 @@ public class KVServer implements IKVServer, Runnable {
 				e.printStackTrace();
 				System.exit(1);
 			} catch (NumberFormatException nfe) {
-				System.out.println("Error! Invalid argument <port>! Not a number!");
-				System.out.println("Usage: Server <port>!");
+				System.out.println("Error! Invalid argument <port> or <cache_size>! Not a number!");
+				System.out.println("Usage: Server <port> <cache_size> <strategy>!");
 				System.exit(1);
 			}
 	    }

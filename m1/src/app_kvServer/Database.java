@@ -6,9 +6,7 @@ import java.util.concurrent.locks.*;
 import org.apache.log4j.Logger;
 
 import java.nio.channels.*;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 
 
 
@@ -157,6 +155,7 @@ public class Database
 	 */
 	public int put(String key, String value)
 	{
+		System.out.println("This is the key value: "+key+value);
 //		long hash = hash_function(key);
 //		String hash = toASCII(key);
 //		String filename = toFilename(key);
@@ -164,7 +163,7 @@ public class Database
 		
 //		File file = new File(filename);
 		
-		if(value == null)
+		if(value == null || value=="")
 		{
 			//delete operation
 			/*
@@ -200,7 +199,7 @@ public class Database
 		{
 			// Insert Function
 			Entry fileContent = new Entry(key,value);
-			try {
+			/*try {*/
 				boolean isModify = true;
 				File file = checkKeyFileExist(key);
 				if(file == null) {
@@ -212,12 +211,12 @@ public class Database
 				
 //				oos.writeObject(fileContent);
 				
-				RandomAccessFile raf = new RandomAccessFile(file, "rws"); // TODO determine if rw or rws is better
-				FileChannel channel = raf.getChannel();
+//				RandomAccessFile raf = new RandomAccessFile(file, "rws"); // TODO determine if rw or rws is better
+//				FileChannel channel = raf.getChannel();
 				logger.info("File write channel opened for "+file.toString());
 				try
 				{
-					FileLock lock = channel.lock();
+//					FileLock lock = channel.lock();
 					FileOutputStream fileWrite = new FileOutputStream(file);
 					ObjectOutputStream writeEntry = new ObjectOutputStream(fileWrite);
 					//ObjectOutputStream writeentry = new ObjectOutputStream(output);
@@ -240,11 +239,11 @@ public class Database
 						return -1;
 					}
 					finally {
-						lock.release();
+//						lock.release();
 						writeEntry.close();
 						fileWrite.close();
-						channel.close();
-						raf.close();
+//						channel.close();
+//						raf.close();
 						logger.info("File write channel closed for "+file.toString());
 					}
 				}
@@ -254,11 +253,11 @@ public class Database
 				}
 				
 				
-			} catch (IOException e) {
+			/*} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 				return -1;
-			}
+			}*/
 			
 		}
 		// TODO Placeholder value

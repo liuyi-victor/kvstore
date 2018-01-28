@@ -49,6 +49,7 @@ public class KVStore implements KVCommInterface {
 			toserver = client.getOutputStream();
 			writeobj = new ObjectOutputStream(toserver);
 			readobj = new ObjectInputStream(fromserver);
+			
 			running = true;
 	}
 
