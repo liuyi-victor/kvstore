@@ -76,7 +76,7 @@ public class ClientConnection implements Runnable
 		{
 			// TODO Problem with logic
 				try {
-					value = cache.get(key);
+					value = (String)cache.access(key, null, false);
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -103,7 +103,7 @@ public class ClientConnection implements Runnable
 			// insert/update/delete operation
 			// TODO change below function(s) currently using 0 as placeholder
 //			success = storage.putKV(key, value);
-			success = cache.put(key, value);
+			success = (int)cache.access(key, value, true);
 //			logger.info(message)
 			// DELETE Operation
 			if(value == null || value.isEmpty()){
