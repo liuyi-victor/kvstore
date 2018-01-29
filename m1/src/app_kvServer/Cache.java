@@ -3,6 +3,8 @@ package app_kvServer;
 import java.util.*;
 import org.apache.log4j.Logger;
 
+import common.messages.KVMessage.StatusType;
+
 class Node<T, U> 
 {
     Node<T, U> previous;
@@ -339,7 +341,6 @@ public class Cache
 		//}
 	}
 	public synchronized int put(String key, String value) {
-		// TODO Auto-generated method stub
 		if(this.type == IKVServer.CacheStrategy.LFU)
 		{
 			cacheline entry = hashmap.get(key);

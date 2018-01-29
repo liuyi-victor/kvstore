@@ -48,6 +48,9 @@ public class ClientConnection implements Runnable
 		String key = msg.getKey(); 
 		String value = msg.getValue();
 		toclient.key = key;
+		toclient.value = value;
+		
+		
 		
 		int success;
 		if(type == StatusType.GET)
@@ -58,7 +61,12 @@ public class ClientConnection implements Runnable
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				if(value == null)
+				if(key.length() > 20)
+				{
+					success = -1;
+					toclient.status = StatusType.GET_ERROR;
+				}
+				else if(value == null)
 				{
 					success = -1;
 					toclient.status = StatusType.GET_ERROR;
@@ -76,28 +84,44 @@ public class ClientConnection implements Runnable
 			// TODO change below function(s) currently using 0 as placeholder
 //			success = storage.putKV(key, value);
 			success = cache.put(key, value);
-			if(success > 0 && value == null)
-			{
-				toclient.status = StatusType.DELETE_SUCCESS;
-			}
-			else if(success < 0 && value == null)
-			{
-				toclient.status = StatusType.DELETE_ERROR;
-			}
-			else if(success < 0 && value != null)
-			{
-				toclient.status = StatusType.PUT_ERROR;
-			}
-			else
-			{
-				// success && value != null
-				if(success == 1)
+//			logger.info(message)
+			// DELETE Operation
+			if(value == null || value.isEmpty()){
+				
+				if(key.length() > 20)
 				{
-					toclient.status = StatusType.PUT_SUCCESS;
+					toclient.status = StatusType.DELETE_ERROR;
 				}
-				else 
+				else if(success > 0)
 				{
-					toclient.status = StatusType.PUT_UPDATE;
+					toclient.status = StatusType.DELETE_SUCCESS;
+				}
+				else if(success < 0)
+				{
+					toclient.status = StatusType.DELETE_ERROR;
+				}
+			}
+			// Inser/Modify Operation
+			else {
+				if(key.length() > 20)
+				{
+					toclient.status = StatusType.PUT_ERROR;
+				}
+				else if(success < 0)
+				{
+					toclient.status = StatusType.PUT_ERROR;
+				}
+				else
+				{
+					if(success == 1)
+					{
+						toclient.status = StatusType.PUT_SUCCESS;
+						System.out.println("Test put success, key is: "+key+"\n length is: "+key.length());
+					}
+					else 
+					{
+						toclient.status = StatusType.PUT_UPDATE;
+					}
 				}
 			}
 		}

@@ -148,8 +148,10 @@ public class KVClient implements IKVClient
 				System.out.println("Record {"+msg.getKey()+" , "+msg.getValue()+"} successfully updated");
 				break;
 			case PUT_ERROR:
-				System.out.println("Error in putting record!");
+				System.out.println("Putting record "+key+" failed!");
 				break;
+			case DELETE_ERROR:
+				System.out.println("Deleting record "+key+" failed!");
 			default:
 				System.out.println("Invalid return received");
 				break;

@@ -84,6 +84,11 @@ public class KVStore implements KVCommInterface {
 			IllegalArgumentException argexception = new IllegalArgumentException("The length of the key cannot be greater than 20 bytes");
 			throw argexception;
 		}
+		if(key.contains(" "))
+		{
+			IllegalArgumentException argexception = new IllegalArgumentException("The key cannot be contain spaces");
+			throw argexception;
+		}
 //		ObjectOutputStream writeobj = new ObjectOutputStream(toserver);
 //		ObjectInputStream readobj = new ObjectInputStream(fromserver);
 		

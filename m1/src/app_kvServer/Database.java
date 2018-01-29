@@ -10,24 +10,24 @@ import java.nio.file.Path;
 
 
 
-
+class Entry implements Serializable
+{
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -6160975907797497423L;
+	String key;
+	String value;
+	public Entry(String k, String v)
+	{
+		key = k;
+		value = v;
+	}
+}
 
 public class Database 
 {
-	private class Entry implements Serializable
-	{
-		/**
-		 * 
-		 */
-		private static final long serialVersionUID = -6160975907797497423L;
-		String key;
-		String value;
-		public Entry(String k, String v)
-		{
-			key = k;
-			value = v;
-		}
-	}
+	
 	
 	private ReentrantReadWriteLock lock;
 	private final String path = "./storage/";
@@ -155,7 +155,7 @@ public class Database
 	 */
 	public int put(String key, String value)
 	{
-		System.out.println("This is the key value: "+key+value);
+		System.out.println("This is the key: "+key+"\n value: "+value);
 //		long hash = hash_function(key);
 //		String hash = toASCII(key);
 //		String filename = toFilename(key);
@@ -236,6 +236,7 @@ public class Database
 					}
 					catch(Exception ex)
 					{
+						logger.error("Cause: "+ex.getCause()+"\n Message: "+ex.getMessage()+"\n Trace: "+ex.getStackTrace());
 						return -1;
 					}
 					finally {
@@ -289,18 +290,18 @@ public class Database
 		// TODO should the following be changed to throw exception instead to comply with others or use the int success variable model in LFUCache.java?
 		//long hash = hash_function(key);
 		//String filename = path + Long.toString(hash);
-		try
-		{
+//		try
+//		{
 			//File file = new File(filename);
 			String filename = toFilename(key);
 			File file = new File(filename);
 			if(file != null)
 			{
-				RandomAccessFile raf = new RandomAccessFile(file, "r");
-				FileChannel channel = raf.getChannel();
+//				RandomAccessFile raf = new RandomAccessFile(file, "r");
+//				FileChannel channel = raf.getChannel();
 				try
 				{
-					FileLock lock = channel.lock();
+//					FileLock lock = channel.lock();
 					Entry record = null;
 					FileInputStream fileread = new FileInputStream(file);
 					ObjectInputStream readentry = new ObjectInputStream(fileread);
@@ -331,11 +332,11 @@ public class Database
 					}
 					finally
 					{
-						lock.release();
+//						lock.release();
 						readentry.close();
 						fileread.close();
-						channel.close();
-						raf.close();
+//						channel.close();
+//						raf.close();
 						logger.info("File read channel released for "+file.toString());
 					}
 					if(record != null)
@@ -352,11 +353,11 @@ public class Database
 			{
 				return null;
 			}
-		}
-		catch(FileNotFoundException notfound)
-		{
-			return null;
-		}
+//		}
+//		catch(FileNotFoundException notfound)
+//		{
+//			return null;
+//		}
 		/*
 		else
 		{
