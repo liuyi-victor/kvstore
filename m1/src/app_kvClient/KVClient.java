@@ -7,6 +7,7 @@ import logger.LogSetup;
 
 import java.net.UnknownHostException;
 import java.util.Arrays;
+import java.util.Random;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
@@ -129,7 +130,28 @@ public class KVClient implements IKVClient
 			if(tokens.length == 2) {
 				get(tokens[1]);
 			}
-		} else {
+		} else if(tokens[0].equals("testone")) {
+			testOne(Integer.parseInt(tokens[1]));
+		} else if(tokens[0].equals("testtwo")) {
+			testTwo(Integer.parseInt(tokens[1]));
+		} else if(tokens[0].equals("testthree")) {
+			testThree(Integer.parseInt(tokens[1]));
+		}
+		else if(tokens[0].equals("test1")) {
+			testyi(Integer.parseInt(tokens[1]),Integer.parseInt(tokens[2]));
+		} else if(tokens[0].equals("test2")) {
+			tester(Integer.parseInt(tokens[1]),Integer.parseInt(tokens[2]));
+		} else if(tokens[0].equals("test3")) {
+			testsan(Integer.parseInt(tokens[1]),Integer.parseInt(tokens[2]));
+		}
+		else if(tokens[0].equals("testa")) {
+			testa(Integer.parseInt(tokens[1]),Integer.parseInt(tokens[2]));
+		} else if(tokens[0].equals("testb")) {
+			testb(Integer.parseInt(tokens[1]),Integer.parseInt(tokens[2]));
+		} else if(tokens[0].equals("testc")) {
+			testc(Integer.parseInt(tokens[1]),Integer.parseInt(tokens[2]));
+		}
+		else {
 			printError("Unknown command");
 			printHelp();
 		}
@@ -336,6 +358,237 @@ public class KVClient implements IKVClient
 		}
 		
     }
+	 private static void testOne(int port){
+		 System.out.println("Starting test one!");
+		 KVStore kvClient = new KVStore("localhost", port);
+		 
+		 try {
+			 kvClient.connect();
+			 long start = System.currentTimeMillis();
+			 long end;
+			 for(int i = 0; i < 100; i++){
+//				 System.out.println(i);
+				 if(i%5 == 0){
+					 kvClient.get(String.valueOf(i));
+				 }else{
+					 kvClient.put(String.valueOf(i),String.valueOf(i));
+				 }
+			 }
+			 end = System.currentTimeMillis();
+			 System.out.println(end-start+" milliseconds");
+			 System.out.println((end-start)/100);
+			 kvClient.disconnect();
+		 } catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+		 }
+	 }
+	 private static void testTwo(int port){
+		 System.out.println("Starting test two!");
+		 KVStore kvClient = new KVStore("localhost", port);
+		 
+		 try {
+			 kvClient.connect();
+			 long start = System.currentTimeMillis();
+			 long end;
+			 for(int i = 0; i < 100; i++){
+//				 System.out.println(i);
+				 if(i%2 == 0){
+					 kvClient.get(String.valueOf(i));
+				 }else{
+					 kvClient.put(String.valueOf(i),String.valueOf(i));
+				 }
+			 }
+			 end = System.currentTimeMillis();
+			 System.out.println(end-start+" milliseconds");
+			 System.out.println((end-start)/100);
+			 kvClient.disconnect();
+		 } catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+		 }
+	 }
+	 private static void testThree(int port){
+		 System.out.println("Starting test three!");
+		 KVStore kvClient = new KVStore("localhost", port);
+		 
+		 try {
+			 kvClient.connect();
+			 long start = System.currentTimeMillis();
+			 long end;
+			 for(int i = 0; i < 100; i++){
+//				 System.out.println(i);
+				 if(i%5 == 0){
+					 kvClient.put(String.valueOf(i),String.valueOf(i));
+				 }else{
+					 kvClient.get(String.valueOf(i));
+				 }
+			 }
+			 end = System.currentTimeMillis();
+			 System.out.println(end-start+" milliseconds");
+			 System.out.println((end-start)/100);
+			 kvClient.disconnect();
+		 } catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+		 }
+	 }
+	 private static void testyi(int port, int size){
+		 System.out.println("Starting test 1!");
+		 KVStore kvClient = new KVStore("localhost", port);
+		 
+		 try {
+			 kvClient.connect();
+			 Random r = new Random();
+			 long start = System.currentTimeMillis();
+			 long end;
+			 for(int i = 0; i < 100; i++){
+//				 System.out.println(i);
+				 if(i%5 == 0){
+					 kvClient.get(String.valueOf(r.nextInt(size)));
+				 }else{
+					 kvClient.put(String.valueOf(r.nextInt(size)),"testVal");
+				 }
+			 }
+			 end = System.currentTimeMillis();
+			 System.out.println(end-start+" milliseconds");
+			 System.out.println((end-start)/100);
+			 kvClient.disconnect();
+		 } catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+		 }
+	 }
+	 private static void tester(int port, int size){
+		 System.out.println("Starting test 2!");
+		 KVStore kvClient = new KVStore("localhost", port);
+		 
+		 try {
+			 kvClient.connect();
+			 Random r = new Random();
+			 long start = System.currentTimeMillis();
+			 long end;
+			 for(int i = 0; i < 100; i++){
+//				 System.out.println(i);
+				 if(i%2 == 0){
+					 kvClient.get(String.valueOf(r.nextInt(size)));
+				 }else{
+					 kvClient.put(String.valueOf(r.nextInt(size)),"testVal");
+				 }
+			 }
+			 end = System.currentTimeMillis();
+			 System.out.println(end-start+" milliseconds");
+			 System.out.println((end-start)/100);
+			 kvClient.disconnect();
+		 } catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+		 }
+	 }
+	 private static void testsan(int port, int size){
+		 System.out.println("Starting test 3!");
+		 KVStore kvClient = new KVStore("localhost", port);
+		 
+		 try {
+			 kvClient.connect();
+			 Random r = new Random();
+			 long start = System.currentTimeMillis();
+			 long end;
+			 for(int i = 0; i < 100; i++){
+//				 System.out.println(i);
+				 if(i%5 == 0){
+					 kvClient.put(String.valueOf(r.nextInt(size)),"testVal");
+				 }else{
+					 kvClient.get(String.valueOf(r.nextInt(size)));
+				 }
+			 }
+			 end = System.currentTimeMillis();
+			 System.out.println(end-start+" milliseconds");
+			 System.out.println((end-start)/100);
+			 kvClient.disconnect();
+		 } catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+		 }
+	 }
+	 private static void testa(int port,int size){
+		 System.out.println("Starting test a!");
+		 KVStore kvClient = new KVStore("localhost", port);
+		 
+		 try {
+			 kvClient.connect();
+			 Random r = new Random();
+			 long start = System.currentTimeMillis();
+			 long end;
+			 for(int i = 0; i < 100; i++){
+//				 System.out.println(i);
+				 if(i%5 == 0){
+					 kvClient.get(String.valueOf(r.nextInt(size)));
+				 }else{
+					 kvClient.put(String.valueOf(r.nextInt(size)),String.valueOf(r.nextInt(size/2)));
+				 }
+			 }
+			 end = System.currentTimeMillis();
+			 System.out.println(end-start+" milliseconds");
+			 System.out.println((end-start)/100);
+			 kvClient.disconnect();
+		 } catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+		 }
+	 }
+	 private static void testb(int port,int size){
+		 System.out.println("Starting test b!");
+		 KVStore kvClient = new KVStore("localhost", port);
+		 
+		 try {
+			 kvClient.connect();
+			 Random r = new Random();
+			 long start = System.currentTimeMillis();
+			 long end;
+			 for(int i = 0; i < 100; i++){
+//				 System.out.println(i);
+				 if(i%2 == 0){
+					 kvClient.get(String.valueOf(r.nextInt(size)));
+				 }else{
+					 kvClient.put(String.valueOf(r.nextInt(size)),String.valueOf(r.nextInt(size/2)));
+				 }
+			 }
+			 end = System.currentTimeMillis();
+			 System.out.println(end-start+" milliseconds");
+			 System.out.println((end-start)/100);
+			 kvClient.disconnect();
+		 } catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+		 }
+	 }
+	 private static void testc(int port,int size){
+		 System.out.println("Starting test c!");
+		 KVStore kvClient = new KVStore("localhost", port);
+		 
+		 try {
+			 kvClient.connect();
+			 Random r = new Random();
+			 long start = System.currentTimeMillis();
+			 long end;
+			 for(int i = 0; i < 100; i++){
+//				 System.out.println(i);
+				 if(i%5 == 0){
+					 kvClient.put(String.valueOf(r.nextInt(size)),String.valueOf(r.nextInt(size/2)));
+				 }else{
+					 kvClient.get(String.valueOf(r.nextInt(size)));
+				 }
+			 }
+			 end = System.currentTimeMillis();
+			 System.out.println(end-start+" milliseconds");
+			 System.out.println((end-start)/100);
+			 kvClient.disconnect();
+		 } catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+		 }
+	 }
 }
 
 

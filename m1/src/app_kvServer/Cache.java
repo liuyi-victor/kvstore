@@ -341,6 +341,9 @@ public class Cache
 		//}
 	}
 	public synchronized int put(String key, String value) {
+		if(value.length() > 120000){
+			return -2;
+		}
 		if(this.type == IKVServer.CacheStrategy.LFU)
 		{
 			cacheline entry = hashmap.get(key);

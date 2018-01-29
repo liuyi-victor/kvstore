@@ -12,6 +12,7 @@ import java.lang.Exception.*;
 
 import org.apache.log4j.Logger;
 
+
 public class KVServer implements IKVServer, Runnable {
 
 	int serverport;
@@ -40,32 +41,26 @@ public class KVServer implements IKVServer, Runnable {
 	public KVServer(int port, int cacheSize, String strategy) {
 		// TODO Input parameter check
 		this.cache_size = cacheSize;	
-		if(cacheSize == 0) {
-			replacement = CacheStrategy.None;
-		} 
-		else 
+		switch(strategy)
 		{
-			switch(strategy)
-			{
-				case "FIFO":
-					replacement = CacheStrategy.FIFO;
-					break;
-				case "LRU":
-					replacement = CacheStrategy.LRU;
-					//cache = new LRUCache(cacheSize);
-					break;
-				case "LFU":
-					replacement = CacheStrategy.LFU;
-					//cache = new LFUCache(cacheSize);
-					break;
-				default:
-					System.out.println("Error! Invalid argument <strategy>! Not a valid caching strategy. Available options are FIFO | LRU | LFU !");
-					System.out.println("Usage: Server <port> <cache_size> <strategy>!");
-					System.exit(1);
-					break;
-			}
-			cache.setType(cacheSize, replacement);
+			case "FIFO":
+				replacement = CacheStrategy.FIFO;
+				break;
+			case "LRU":
+				replacement = CacheStrategy.LRU;
+				//cache = new LRUCache(cacheSize);
+				break;
+			case "LFU":
+				replacement = CacheStrategy.LFU;
+				//cache = new LFUCache(cacheSize);
+				break;
+			default:
+				System.out.println("Error! Invalid argument <strategy>! Not a valid caching strategy. Available options are FIFO | LRU | LFU !");
+				System.out.println("Usage: Server <port> <cache_size> <strategy>!");
+				System.exit(1);
+				break;
 		}
+		cache.setType(cacheSize, replacement);
 		if(port < wellknowports && port != 0)
 		{
 			IllegalArgumentException argexception = new IllegalArgumentException("Invalid server port number");
@@ -75,6 +70,7 @@ public class KVServer implements IKVServer, Runnable {
 		initializeServer();
 	}
 
+	@Override
 	public void run()
 	{
 		if(server != null) 
@@ -233,7 +229,6 @@ public class KVServer implements IKVServer, Runnable {
 					int size = Integer.parseInt(args[1]);
 					String strategy = args[2];
 					new Thread(new KVServer(port, size, strategy)).run();
-					// TODO enable different cache strategy and ports
 				}
 			} catch (IOException e) {
 				System.out.println("Error! Unable to initialize logger!");
@@ -244,5 +239,6 @@ public class KVServer implements IKVServer, Runnable {
 				System.out.println("Usage: Server <port> <cache_size> <strategy>!");
 				System.exit(1);
 			}
-	    }
+	 }
+	 
 }

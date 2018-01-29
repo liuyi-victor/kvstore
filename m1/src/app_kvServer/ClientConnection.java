@@ -50,11 +50,31 @@ public class ClientConnection implements Runnable
 		toclient.key = key;
 		toclient.value = value;
 		
-		
-		
 		int success;
-		if(type == StatusType.GET)
+		
+		if(key.contains(" ")){
+			switch(type){
+			case GET:
+				toclient.status = StatusType.GET_ERROR;
+				success = -1;
+				break;
+			case PUT:
+				if(value == null || value.isEmpty()){
+					toclient.status = StatusType.DELETE_ERROR;
+					success = -2;
+				}else{
+					toclient.status = StatusType.PUT_ERROR;
+					success = -2;
+				}
+				break;
+			default:
+				success = -1;
+				break;
+			}
+		}
+		else if(type == StatusType.GET)
 		{
+			// TODO Problem with logic
 				try {
 					value = cache.get(key);
 				} catch (Exception e) {

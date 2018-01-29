@@ -2,7 +2,6 @@ package app_kvServer;
 
 public interface IKVServer {
     public enum CacheStrategy {
-        None,// TODO switch to upper case for consistency with getCacheStrategy
         LRU,
         LFU,
         FIFO
@@ -71,6 +70,11 @@ public interface IKVServer {
      */
     public void clearStorage();
 
+    /**
+     * Starts running the server
+     */
+    public void run();
+    
     /**
      * Abruptly stop the server without any additional actions
      * NOTE: this includes performing saving to storage

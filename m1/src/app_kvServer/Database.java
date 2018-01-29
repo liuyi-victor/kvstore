@@ -155,7 +155,7 @@ public class Database
 	 */
 	public int put(String key, String value)
 	{
-		System.out.println("This is the key: "+key+"\n value: "+value);
+		logger.info("Incoming Request: key = "+key+"\n value = "+value);
 //		long hash = hash_function(key);
 //		String hash = toASCII(key);
 //		String filename = toFilename(key);
@@ -295,74 +295,57 @@ public class Database
 			//File file = new File(filename);
 			String filename = toFilename(key);
 			File file = new File(filename);
-			if(file != null)
-			{
-//				RandomAccessFile raf = new RandomAccessFile(file, "r");
+			//				RandomAccessFile raf = new RandomAccessFile(file, "r");
 //				FileChannel channel = raf.getChannel();
+			try
+			{
+//					FileLock lock = channel.lock();
+				Entry record = null;
+				FileInputStream fileread = new FileInputStream(file);
+				ObjectInputStream readentry = new ObjectInputStream(fileread);
+				logger.info("File read channel acquired for "+file.toString());
+				//ObjectOutputStream writeentry = new ObjectOutputStream(output);
 				try
 				{
-//					FileLock lock = channel.lock();
-					Entry record = null;
-					FileInputStream fileread = new FileInputStream(file);
-					ObjectInputStream readentry = new ObjectInputStream(fileread);
-					logger.info("File read channel acquired for "+file.toString());
-					//ObjectOutputStream writeentry = new ObjectOutputStream(output);
-					try
-					{
 //						while(true)	//continuously looking into the file
 //						{
-							record = (Entry)readentry.readObject();
-							logger.info(System.currentTimeMillis()+":"+"Disk GET key="+record.key+" value=\""+record.value+"\"");
+						record = (Entry)readentry.readObject();
+						logger.info(System.currentTimeMillis()+":"+"Disk GET key="+record.key+" value=\""+record.value+"\"");
 //							if(record.key == key)
 //							{
 //								break;
 //							}
 //						}
-					}
-					catch(Exception ex)
+				}
+				catch(Exception ex)
+				{
+					if(ex instanceof EOFException)
 					{
-						if(ex instanceof EOFException)
-						{
-							
-						}
-						else if(ex instanceof ClassNotFoundException)
-						{
-							
-						}
+						
 					}
-					finally
+					else if(ex instanceof ClassNotFoundException)
 					{
+						
+					}
+				}
+				finally
+				{
 //						lock.release();
-						readentry.close();
-						fileread.close();
+					readentry.close();
+					fileread.close();
 //						channel.close();
 //						raf.close();
-						logger.info("File read channel released for "+file.toString());
-					}
-					if(record != null)
-						return record.value;
-					else 
-						return null;
+					logger.info("File read channel released for "+file.toString());
 				}
-				catch(IOException ioex)
-				{
+				if(record != null)
+					return record.value;
+				else 
 					return null;
-				}
 			}
-			else
+			catch(IOException ioex)
 			{
 				return null;
 			}
-//		}
-//		catch(FileNotFoundException notfound)
-//		{
-//			return null;
-//		}
-		/*
-		else
-		{
-			return null;
-		}*/
 	}
 	
 	public void clearStorage() {
