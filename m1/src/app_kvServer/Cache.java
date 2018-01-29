@@ -186,93 +186,6 @@ public class Cache
 		{
 			//get
 			return get(key);
-			/*
-			if(type == IKVServer.CacheStrategy.LFU)
-			{
-					cacheline entry = hashmap.get(key);
-					if(entry != null)
-					{
-						if(queue.remove(entry.ptr))
-						{
-							entry.ptr.count = entry.ptr.count + 1;
-							queue.offer(entry.ptr);
-						}
-						return entry.value;
-					}
-					else
-					{
-						// try getting the record from the database
-						String val = nosql.get(key);
-						if(val == null)
-							return null;
-						else
-						{
-							// the database contains the record and save it to the cache
-							cacheline insertion = new cacheline();
-							lfuentry element = new lfuentry(key, val, 1);
-							
-							insertion.value = val;
-							insertion.ptr = element;
-							
-							if(hashmap.size() >= this.capacity)
-							{
-								replacement();
-							}
-							hashmap.put(key, insertion);
-							queue.offer(element);
-							return val;
-						}
-					}
-			}
-			else if(type == IKVServer.CacheStrategy.LRU)
-			{
-				String result = cache.get(key);
-				String val;
-				if(result != null) 
-				{
-					// Refresh access of hashmap
-					val = cache.remove(key);
-					cache.put(key, val);
-					return result;
-				}
-				else
-				{
-					// the cache does not have the records, try searching in the database
-					val = nosql.get(key);
-					if(val == null)
-						return null;
-					else
-					{
-						// the database contains the record and save it to the cache
-						// TODO: insert into the LRU cache
-						cache.put(key, val);
-					}
-				}
-				return result;	//TODO: check the correctness
-			}
-			else
-			{
-				String result = fifo.get(key);
-				String val;
-				if(result != null) 
-				{
-					return result;
-				}
-				else
-				{
-					// the cache does not have the records, try searching in the database
-					val = nosql.get(key);
-					if(val == null)
-						return null;
-					else
-					{
-						// the database contains the record and save it to the cache
-						// TODO: insert into the LRU cache
-						fifo.put(key, val);
-					}
-				}
-				return result;	//TODO: check the correctness
-			}*/
 		}
 		else
 		{
@@ -425,17 +338,18 @@ public class Cache
 		//if(this.type == IKVServer.CacheStrategy.LFU)
 		//{
 			lfuentry entry = queue.poll();	//pop the least frequently used element
-			if(hashmap.remove(entry.key).value == entry.value)
-			{
+			/*if(*/hashmap.remove(entry.key);//.value// == entry.value)
+			//{
 				//success
 				return true;
-			}
-			else
-			{
-				//error occurred
-				queue.offer(entry);	//add the entry back
-				return false;
-			}
+				//TODO these were commendted jan28
+			//}
+//			else
+//			{
+//				//error occurred
+//				queue.offer(entry);	//add the entry back
+//				return false;
+//			}
 		//}
 	}
 	public synchronized int put(String key, String value) {
@@ -473,6 +387,7 @@ public class Cache
 					{
 						entry.ptr.count = entry.ptr.count + 1;
 						entry.value = value;
+						entry.ptr.value = value;// TODO this was added as bug fix, 1.28
 						queue.offer(entry.ptr);
 					}
 				}

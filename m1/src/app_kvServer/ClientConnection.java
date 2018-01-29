@@ -77,6 +77,7 @@ public class ClientConnection implements Runnable
 			// TODO Problem with logic
 				try {
 					value = (String)cache.access(key, null, false);
+//					value = cache.get(key);
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -104,6 +105,7 @@ public class ClientConnection implements Runnable
 			// TODO change below function(s) currently using 0 as placeholder
 //			success = storage.putKV(key, value);
 			success = (int)cache.access(key, value, true);
+//			success = cache.put(key,value);
 //			logger.info(message)
 			// DELETE Operation
 			if(value == null || value.isEmpty()){

@@ -93,8 +93,7 @@ public class KVStore implements KVCommInterface {
 //		ObjectInputStream readobj = new ObjectInputStream(fromserver);
 		
 		Message request = new Message(key, value, KVMessage.StatusType.PUT);
-		System.out.println("Key:"+key+" value: "+value+" put");
-		System.out.println("Key:"+request.key+" value: "+request.value+" "+request.getStatus().toString());
+		logger.info("Key:"+request.key+" value: "+request.value+" "+request.getStatus().toString());
 		// TODO remove
 		writeobj.writeObject(request);
 		Message reply = (Message)readobj.readObject();
