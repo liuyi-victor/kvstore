@@ -180,7 +180,105 @@ public class Cache
 		}
 		//return hashmap.get(key);
 	}
-
+	public synchronized Object access(String key, String value, boolean isput)
+	{
+		if(isput == false)
+		{
+			//get
+			return get(key);
+			/*
+			if(type == IKVServer.CacheStrategy.LFU)
+			{
+					cacheline entry = hashmap.get(key);
+					if(entry != null)
+					{
+						if(queue.remove(entry.ptr))
+						{
+							entry.ptr.count = entry.ptr.count + 1;
+							queue.offer(entry.ptr);
+						}
+						return entry.value;
+					}
+					else
+					{
+						// try getting the record from the database
+						String val = nosql.get(key);
+						if(val == null)
+							return null;
+						else
+						{
+							// the database contains the record and save it to the cache
+							cacheline insertion = new cacheline();
+							lfuentry element = new lfuentry(key, val, 1);
+							
+							insertion.value = val;
+							insertion.ptr = element;
+							
+							if(hashmap.size() >= this.capacity)
+							{
+								replacement();
+							}
+							hashmap.put(key, insertion);
+							queue.offer(element);
+							return val;
+						}
+					}
+			}
+			else if(type == IKVServer.CacheStrategy.LRU)
+			{
+				String result = cache.get(key);
+				String val;
+				if(result != null) 
+				{
+					// Refresh access of hashmap
+					val = cache.remove(key);
+					cache.put(key, val);
+					return result;
+				}
+				else
+				{
+					// the cache does not have the records, try searching in the database
+					val = nosql.get(key);
+					if(val == null)
+						return null;
+					else
+					{
+						// the database contains the record and save it to the cache
+						// TODO: insert into the LRU cache
+						cache.put(key, val);
+					}
+				}
+				return result;	//TODO: check the correctness
+			}
+			else
+			{
+				String result = fifo.get(key);
+				String val;
+				if(result != null) 
+				{
+					return result;
+				}
+				else
+				{
+					// the cache does not have the records, try searching in the database
+					val = nosql.get(key);
+					if(val == null)
+						return null;
+					else
+					{
+						// the database contains the record and save it to the cache
+						// TODO: insert into the LRU cache
+						fifo.put(key, val);
+					}
+				}
+				return result;	//TODO: check the correctness
+			}*/
+		}
+		else
+		{
+			return put(key, value);
+		}
+	}
 	public synchronized String get(String key)
 	{
 		if(type == IKVServer.CacheStrategy.LFU)
