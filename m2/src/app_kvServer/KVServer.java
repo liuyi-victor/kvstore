@@ -1,7 +1,27 @@
 package app_kvServer;
 
+import java.net.ServerSocket;
+
+import org.apache.log4j.Logger;
+
+import app_kvServer.IKVServer.CacheStrategy;
+import org.apache.zookeeper.*;
+
 public class KVServer implements IKVServer {
 
+	int serverport;
+	int cache_size;
+	CacheStrategy replacement;
+	ServerSocket server;
+	private final int wellknowports = 1024;
+	private static Logger logger = Logger.getRootLogger();
+	private boolean running;
+	private static Database nosql = new Database();
+	private static Cache cache = new Cache(); 
+	
+	
+	private ZooKeeper zk;
+	private Watcher watch;
 	/**
 	 * Start KV Server with selected name
 	 * @param name			unique name of server
@@ -27,13 +47,13 @@ public class KVServer implements IKVServer {
 	@Override
     public CacheStrategy getCacheStrategy(){
 		// TODO Auto-generated method stub
-		return IKVServer.CacheStrategy.None;
+		return this.replacement;
 	}
 
 	@Override
     public int getCacheSize(){
 		// TODO Auto-generated method stub
-		return -1;
+		return cache_size;
 	}
 
 	@Override
