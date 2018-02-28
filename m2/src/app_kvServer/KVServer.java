@@ -1,6 +1,8 @@
 package app_kvServer;
 
+import java.io.IOException;
 import java.net.ServerSocket;
+import java.net.Socket;
 
 import org.apache.log4j.Logger;
 
@@ -21,7 +23,7 @@ public class KVServer implements IKVServer, Runnable, Watcher, StatCallback {
 	ServerSocket server;
 	private final int wellknowports = 1024;
 	private static Logger logger = Logger.getRootLogger();
-	private boolean running;
+	private ServerState running;
 	private static Database nosql = new Database();
 	private static Cache cache = new Cache(); 
 	
@@ -65,7 +67,7 @@ public class KVServer implements IKVServer, Runnable, Watcher, StatCallback {
 	                break;
 	            case Expired:
 	                // It's all over
-	                this.running = false;
+	                this.running = ServerState.SERVER_STOPPED;
 	                break;
             }
         } 
@@ -78,6 +80,37 @@ public class KVServer implements IKVServer, Runnable, Watcher, StatCallback {
             	byte metadata[] = zk.getData(znode, this, stat);
             }
         }
+	}
+	public void run()
+	{
+		if(server != null) 
+		{
+			while(isRunning())
+			{
+			    try 
+			    {
+					Socket client = server.accept();                
+					ClientConnection connection = new ClientConnection(client, cache);
+					new Thread(connection).start();
+			
+					logger.info("Connected to " 
+							+ client.getInetAddress().getHostName() 
+							+  " on port " + client.getPort());
+			    } 
+			    catch (IOException e) 
+			    {
+			    	logger.error("Error! " +
+			    			"Unable to establish connection. \n", e);
+			    }
+	        }
+        }
+        logger.info("Server stopped.");
+	}
+	private boolean isRunning() {
+		if(this.running == ServerState.SERVER_RUNNING)
+			return true;
+		else
+			return false;
 	}
 	@Override
 	public int getPort(){

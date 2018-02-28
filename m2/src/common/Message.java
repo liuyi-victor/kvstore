@@ -2,6 +2,7 @@ package common;
 import java.io.*;
 
 import ecs.IECSNode;
+import ecs.ECSNode;
 
 public class Message implements KVMessage, Serializable
 {
@@ -48,6 +49,9 @@ public class Message implements KVMessage, Serializable
 	}
 	public IECSNode getResponsibleServer()
 	{
-		
+		ECSNode node = new ECSNode();
+		node.address = serveraddress;
+		node.port = serverport;
+		return node;
 	}
 }

@@ -1,12 +1,20 @@
 package app_kvECS;
 
+import java.io.IOException;
 import java.util.Map;
 import java.util.Collection;
 
+import org.apache.zookeeper.ZooKeeper;
+
 import ecs.IECSNode;
 
-public class ECSClient implements IECSClient {
-
+public class ECSClient implements IECSClient, Watcher 
+{
+	static ZooKeeper zk;
+	final int zkport = 2181;
+	int servercount = 0;
+	String zkhost = "127.0.0.1";
+	
     @Override
     public boolean start() {
         // TODO
@@ -28,7 +36,17 @@ public class ECSClient implements IECSClient {
     @Override
     public IECSNode addNode(String cacheStrategy, int cacheSize) {
         // TODO
-        return null;
+    	Process proc;
+    	String script = "script.sh";
+
+    	Runtime run = Runtime.getRuntime();
+    	try {
+    	  proc = run.exec(script);
+    	} catch (IOException e) {
+    	  e.printStackTrace();
+    	}
+
+        //return null;
     }
 
     @Override
@@ -69,5 +87,13 @@ public class ECSClient implements IECSClient {
 
     public static void main(String[] args) {
         // TODO
+    	try 
+		{
+			zk = new ZooKeeper(zkhost+":"+zkport, 3000, this);
+		} 
+		catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
     }
 }

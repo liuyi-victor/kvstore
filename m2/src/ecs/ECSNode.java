@@ -6,11 +6,11 @@ import org.apache.zookeeper.*;
 
 public class ECSNode implements IECSNode, Serializable
 {
-	String name;
-	String address;
-	int port;
-	String lowerHash;
-	String upperHash;
+	public String name;
+	public String address;
+	public int port;
+	public String lowerHash;
+	public String upperHash;
 	
 	public ECSNode() 
 	{
