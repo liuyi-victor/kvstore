@@ -5,9 +5,15 @@ import java.net.ServerSocket;
 import org.apache.log4j.Logger;
 
 import app_kvServer.IKVServer.CacheStrategy;
-import org.apache.zookeeper.*;
+import org.apache.zookeeper.KeeperException;
+import org.apache.zookeeper.WatchedEvent;
+import org.apache.zookeeper.Watcher;
+import org.apache.zookeeper.ZooKeeper;
+import org.apache.zookeeper.AsyncCallback.StatCallback;
+import org.apache.zookeeper.KeeperException.Code;
+import org.apache.zookeeper.data.Stat;
 
-public class KVServer implements IKVServer {
+public class KVServer implements IKVServer, Runnable, Watcher, StatCallback {
 
 	int serverport;
 	int cache_size;
@@ -22,6 +28,9 @@ public class KVServer implements IKVServer {
 	
 	private ZooKeeper zk;
 	private Watcher watch;
+	private String zkhost;
+	private String znode;
+	private int zkport;
 	/**
 	 * Start KV Server with selected name
 	 * @param name			unique name of server
@@ -30,18 +39,56 @@ public class KVServer implements IKVServer {
 	 */
 	public KVServer(String name, String zkHostname, int zkPort) {
 		// TODO Auto-generated method stub
+		zkhost = zkHostname;
+		zkport = zkPort;
+		this.znode = name;
+		
+		//initiate a zookeeper client at this KVServer
+		zk = new ZooKeeper(zkhost+":"+zkport, 3000, this);
+		zk.exists(name, true, this, null);
 	}
 
+	public void process(WatchedEvent event)
+	{
+		String path = event.getPath();
+        if (event.getType() == Event.EventType.None) 
+        {
+            // We are are being told that the state of the
+            // connection has changed
+            switch (event.getState()) 
+            {
+	            case SyncConnected:
+	                // In this particular example we don't need to do anything
+	                // here - watches are automatically re-registered with 
+	                // server and any watches triggered while the client was 
+	                // disconnected will be delivered (in order of course)
+	                break;
+	            case Expired:
+	                // It's all over
+	                this.running = false;
+	                break;
+            }
+        } 
+        else 
+        {
+            if (path != null && path.equals(znode)) 
+            {
+                // Something has changed on the node, let's find out
+            	Stat stat = zk.exists(znode, true);
+            	byte metadata[] = zk.getData(znode, this, stat);
+            }
+        }
+	}
 	@Override
 	public int getPort(){
 		// TODO Auto-generated method stub
-		return -1;
+		return serverport;
 	}
 
 	@Override
     public String getHostname(){
 		// TODO Auto-generated method stub
-		return null;
+		return server.getInetAddress().getHostName();
 	}
 
 	@Override

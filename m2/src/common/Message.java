@@ -8,6 +8,8 @@ public class Message implements KVMessage, Serializable
 	public String key;
 	public String value;
 	public StatusType status;
+	public String serveraddress;
+	public int serverport;
 	
 	/**
 	 * Creates an instance of the Message class for network client-server interaction.
