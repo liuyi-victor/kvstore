@@ -16,6 +16,17 @@ public class ECSNode implements IECSNode, Serializable
 	{
 		
 	}
+	public ECSNode(byte[] array)
+	{
+		String meta = array.toString();
+		
+		String metadata[] = meta.split("\n");
+		this.name = metadata[0];
+		this.address = metadata[1];
+		this.port = Integer.parseInt(metadata[2]);
+		this.lowerHash = metadata[3];
+		this.upperHash = metadata[4];
+	}
 	public ECSNode(String name, String address, int port, String lowerHash, String upperHash)
 	{
 		this.name = name;
@@ -45,7 +56,8 @@ public class ECSNode implements IECSNode, Serializable
 	}
 	public byte[] toArray()
 	{
-		String meta = "name: "+this.name + "\n" + "address: "+this.address + "\n" + "port: "+ Integer.toString(this.port) + "\n" + "lowerHash: "+this.lowerHash + "\n" + "upperHash: "+this.upperHash;
+		//String meta = "name: "+this.name + "\n" + "address: "+this.address + "\n" + "port: "+ Integer.toString(this.port) + "\n" + "lowerHash: "+this.lowerHash + "\n" + "upperHash: "+this.upperHash;
+		String meta = this.name + "\n" + this.address + "\n" + Integer.toString(this.port) + "\n" + this.lowerHash + "\n" + this.upperHash;
 		return meta.getBytes();
 	}
 }

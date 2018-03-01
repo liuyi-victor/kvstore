@@ -13,6 +13,11 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import common.*;
 import common.KVMessage.StatusType;
+import java.security.MessageDigest;
+
+import javax.xml.bind.annotation.adapters.HexBinaryAdapter;
+import org.apache.zookeeper.*;
+import ecs.*;
 
 public class ClientConnection implements Runnable
 {
@@ -30,14 +35,34 @@ public class ClientConnection implements Runnable
 //	private static Database nosql = new Database();
 	private ObjectInputStream readobj;
 	private ObjectOutputStream writeobj;
+	private ECSNode meta;
 	//private static Vector<String> queue;		//used as a request queue that buffers requests to the cache
 	
-	public ClientConnection(Socket clientSocket, Cache cache) {
+	public ClientConnection(Socket clientSocket, Cache cache, ECSNode node) {
 		this.clientSocket = clientSocket;
 		this.isOpen = true;
 		this.cache = cache; 
+		this.meta = node;
 	}
 	
+	private boolean hashRange(String hash)
+	{
+		if(meta.lowerHash.compareTo(meta.upperHash) < 0)
+		{
+			//does not wrap around the ring
+			if(meta.lowerHash.compareTo(hash) < 0 && meta.upperHash.compareTo(hash) > 0 )
+				return true;
+			else 
+				return false;
+		}
+		else
+		{
+			if(meta.lowerHash.compareTo(hash) > 0 && meta.upperHash.compareTo(hash) < 0 )
+				return false;
+			else 
+				return true;
+		}
+	}
 	// TODO add comments
 	// TODO adjust the int success variable
 	private boolean handleclient(Message msg, Message toclient)
@@ -49,6 +74,13 @@ public class ClientConnection implements Runnable
 		String value = msg.getValue();
 		toclient.key = key;
 		toclient.value = value;
+		
+		MessageDigest md = MessageDigest.getInstance("MD5");
+		String hash = (new HexBinaryAdapter()).marshal((md.digest(key.getBytes())));
+		if(!hashRange(hash))
+		{
+			toclient.status = StatusType.SERVER_NOT_RESPONSIBLE;
+		}
 		
 		int success;
 		
@@ -123,7 +155,7 @@ public class ClientConnection implements Runnable
 					toclient.status = StatusType.DELETE_ERROR;
 				}
 			}
-			// Inser/Modify Operation
+			// Insert/Modify Operation
 			else {
 				if(key.length() > 20)
 				{
