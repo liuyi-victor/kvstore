@@ -1,13 +1,13 @@
 package app_kvECS;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.Map;
+import java.util.StringTokenizer;
+import java.util.Vector;
 import java.util.Collection;
-
-import org.apache.zookeeper.Watcher;
-import org.apache.zookeeper.ZooKeeper;
-
-import java.security.MessageDigest;
+import java.util.List;
 import org.apache.zookeeper.*;
 import ecs.*;
 import ecs.IECSNode;
@@ -18,6 +18,15 @@ public class ECSClient implements IECSClient, Watcher
 	final int zkport = 2181;
 	int servercount = 0;
 	String zkhost = "127.0.0.1";
+	
+	ECSClient(List<String> names,List<String> addresses,List<String> ports){
+		try {
+			zk = new ZooKeeper(zkhost+":"+zkport, 3000, this);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 	
     @Override
     public boolean start() {
@@ -98,7 +107,52 @@ public class ECSClient implements IECSClient, Watcher
 
     public static void main(String[] args) {
         // TODO
-    	try 
+    		if(args.length != 1) {
+    			System.err.println("USAGE: java -jar m2-ecs.jar ecs.config");
+    			System.exit(2);
+    		}
+    		
+    		List<String> names = new Vector<String>();
+		List<String> addresses = new Vector<String>();
+		List<String> ports = new Vector<String>();
+    		
+    		// Parse ECS config file and put value inside list
+		try {
+			String filename = args[0];
+			File file = new File(filename);
+			if(file.isFile())
+			{
+				List<String> allLines = Files.readAllLines(file.toPath());
+				
+				for(String line : allLines) {
+//					System.out.println("Original line: "+line);
+					StringTokenizer st = new StringTokenizer(line);
+					// Skip invalid entries
+					if(st.countTokens() != 3) {
+//						System.out.println("Num tokens "+st.countTokens());
+						continue;
+					}
+					names.add(st.nextToken());
+					// TODO if not needed, can combine address port here
+					addresses.add(st.nextToken());
+					ports.add(st.nextToken());
+				}
+				// TODO possibly add detection for duplicate name / address+port
+				
+			}else {
+				System.err.println("File does not exist!");
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		System.out.println(names);
+		System.out.println(addresses);
+		System.out.println(ports);
+		
+    		ECSClient ec = new ECSClient(names,addresses,ports);
+    		ec.start();
+    	/*try 
 		{
 			zk = new ZooKeeper(zkhost+":"+zkport, 3000, this);
 			
@@ -107,6 +161,12 @@ public class ECSClient implements IECSClient, Watcher
 		catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
+		}*/
     }
+
+	@Override
+	public void process(WatchedEvent event) {
+		// TODO Auto-generated method stub
+		
+	}
 }
