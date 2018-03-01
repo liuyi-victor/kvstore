@@ -3,7 +3,7 @@ package app_kvServer;
 import java.util.*;
 import org.apache.log4j.Logger;
 
-import common.messages.KVMessage.StatusType;
+import common.KVMessage.StatusType;
 
 class Node<T, U> 
 {

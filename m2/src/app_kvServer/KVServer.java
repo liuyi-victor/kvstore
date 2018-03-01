@@ -46,7 +46,12 @@ public class KVServer implements IKVServer, Runnable, Watcher, StatCallback {
 		this.znode = name;
 		
 		//initiate a zookeeper client at this KVServer
-		zk = new ZooKeeper(zkhost+":"+zkport, 3000, this);
+		try {
+			zk = new ZooKeeper(zkhost+":"+zkport, 3000, this);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		zk.exists(name, true, this, null);
 	}
 
@@ -76,11 +81,19 @@ public class KVServer implements IKVServer, Runnable, Watcher, StatCallback {
             if (path != null && path.equals(znode)) 
             {
                 // Something has changed on the node, let's find out
-            	Stat stat = zk.exists(znode, true);
-            	byte metadata[] = zk.getData(znode, this, stat);
+            		Stat stat;
+				try {
+					stat = zk.exists(znode, true);
+					byte metadata[] = zk.getData(znode, this, stat);
+				} catch (KeeperException | InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
             }
         }
 	}
+	
+	@Override
 	public void run()
 	{
 		if(server != null) 
@@ -169,10 +182,6 @@ public class KVServer implements IKVServer, Runnable, Watcher, StatCallback {
 		// TODO Auto-generated method stub
 	}
 
-	@Override
-    public void run(){
-		// TODO Auto-generated method stub
-	}
 
 	@Override
     public void kill(){
@@ -208,5 +217,11 @@ public class KVServer implements IKVServer, Runnable, Watcher, StatCallback {
     public boolean moveData(String[] hashRange, String targetName) throws Exception {
 		// TODO
 		return false;
+	}
+
+	@Override
+	public void processResult(int rc, String path, Object ctx, Stat stat) {
+		// TODO Auto-generated method stub
+		
 	}
 }

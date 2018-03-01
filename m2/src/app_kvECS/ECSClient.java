@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.Collection;
 
+import org.apache.zookeeper.Watcher;
 import org.apache.zookeeper.ZooKeeper;
 
 import ecs.IECSNode;
@@ -90,6 +91,8 @@ public class ECSClient implements IECSClient, Watcher
     	try 
 		{
 			zk = new ZooKeeper(zkhost+":"+zkport, 3000, this);
+			
+			// TODO Parser goes here
 		} 
 		catch (IOException e) {
 			// TODO Auto-generated catch block
