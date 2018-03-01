@@ -92,7 +92,6 @@ public class ClientConnection implements Runnable
 			e1.printStackTrace();
 		}
 		
-		
 		int success;
 		
 		if(key.contains(" ")){
