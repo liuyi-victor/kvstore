@@ -11,8 +11,8 @@ import logger.LogSetup;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
-import common.messages.*;
-import common.messages.KVMessage.StatusType;
+import common.*;
+import common.KVMessage.StatusType;
 
 public class ClientConnection implements Runnable
 {

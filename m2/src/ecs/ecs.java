@@ -1,4 +1,5 @@
 package ecs;
+import java.io.IOException;
 import java.lang.*;
 import org.apache.zookeeper.*;
 import java.security.MessageDigest;
@@ -13,8 +14,14 @@ public class ecs implements Watcher
 	//Watcher watch;
 	public ecs()
 	{
-		//watch = new Watcher();
-		zk = new ZooKeeper(zkhost+":"+zkport, 3000, this);
+		try 
+		{
+			zk = new ZooKeeper(zkhost+":"+zkport, 3000, this);
+		} 
+		catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
 	}
 	public void create(String path, byte[] data) throws KeeperException,InterruptedException 
