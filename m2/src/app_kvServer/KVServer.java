@@ -15,19 +15,22 @@ import org.apache.zookeeper.AsyncCallback.StatCallback;
 import org.apache.zookeeper.KeeperException.Code;
 import org.apache.zookeeper.data.Stat;
 
+import ecs.*;
+
 public class KVServer implements IKVServer, Runnable, Watcher, StatCallback {
 
 	int serverport;
 	int cache_size;
 	CacheStrategy replacement;
 	ServerSocket server;
+
 	private final int wellknowports = 1024;
 	private static Logger logger = Logger.getRootLogger();
 	private ServerState running;
 	private static Database nosql = new Database();
 	private static Cache cache = new Cache(); 
 	
-	
+	private ECSNode meta;
 	private ZooKeeper zk;
 	private Watcher watch;
 	private String zkhost;
@@ -53,6 +56,9 @@ public class KVServer implements IKVServer, Runnable, Watcher, StatCallback {
 			e.printStackTrace();
 		}
 		zk.exists(name, true, this, null);
+		
+		//initialize the state to SERVER_STOPPED
+		running = ServerState.SERVER_STOPPED;
 	}
 
 	public void process(WatchedEvent event)
@@ -85,6 +91,8 @@ public class KVServer implements IKVServer, Runnable, Watcher, StatCallback {
             	{
 	            	Stat stat = zk.exists(znode, true);
 	            	byte metadata[] = zk.getData(znode, this, stat);
+	            	ECSNode node = new ECSNode(metadata); 
+	            	meta.setNode(node);
             	}
             	catch(Exception ex)
             	{
@@ -104,7 +112,7 @@ public class KVServer implements IKVServer, Runnable, Watcher, StatCallback {
 			    try 
 			    {
 					Socket client = server.accept();                
-					ClientConnection connection = new ClientConnection(client, cache);
+					ClientConnection connection = new ClientConnection(client, cache, meta);
 					new Thread(connection).start();
 			
 					logger.info("Connected to " 
@@ -197,11 +205,14 @@ public class KVServer implements IKVServer, Runnable, Watcher, StatCallback {
 	@Override
 	public void start() {
 		// TODO
+		running = ServerState.SERVER_RUNNING;
 	}
 
     @Override
-    public void stop() {
+    public void stop() 
+    {
 		// TODO
+    	
 	}
 
     @Override

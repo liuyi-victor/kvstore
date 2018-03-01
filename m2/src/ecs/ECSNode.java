@@ -1,7 +1,7 @@
 package ecs;
 
 import java.io.Serializable;
-
+import app_kvServer.IKVServer.*;
 import org.apache.zookeeper.*;
 
 public class ECSNode implements IECSNode, Serializable
@@ -11,6 +11,7 @@ public class ECSNode implements IECSNode, Serializable
 	public int port;
 	public String lowerHash;
 	public String upperHash;
+	public ServerState state;
 	
 	public ECSNode() 
 	{
@@ -26,8 +27,20 @@ public class ECSNode implements IECSNode, Serializable
 		this.port = Integer.parseInt(metadata[2]);
 		this.lowerHash = metadata[3];
 		this.upperHash = metadata[4];
+		if(metadata[5] == ServerState.SERVER_RUNNING.name())
+		{
+			this.state = ServerState.SERVER_RUNNING;
+		}
+		else if(metadata[5] == ServerState.SERVER_STOPPED.name())
+		{
+			this.state = ServerState.SERVER_STOPPED;
+		}
+		else if(metadata[5] == ServerState.SERVER_WRITE_LOCK.name())
+		{
+			this.state = ServerState.SERVER_WRITE_LOCK;
+		}
 	}
-	public ECSNode(String name, String address, int port, String lowerHash, String upperHash)
+	public ECSNode(String name, String address, int port, String lowerHash, String upperHash, )
 	{
 		this.name = name;
 		this.address = address;
@@ -57,7 +70,16 @@ public class ECSNode implements IECSNode, Serializable
 	public byte[] toArray()
 	{
 		//String meta = "name: "+this.name + "\n" + "address: "+this.address + "\n" + "port: "+ Integer.toString(this.port) + "\n" + "lowerHash: "+this.lowerHash + "\n" + "upperHash: "+this.upperHash;
-		String meta = this.name + "\n" + this.address + "\n" + Integer.toString(this.port) + "\n" + this.lowerHash + "\n" + this.upperHash;
+		String meta = this.name + "\n" + this.address + "\n" + Integer.toString(this.port) + "\n" + this.lowerHash + "\n" + this.upperHash + "\n" + this.state.name();
 		return meta.getBytes();
+	}
+	public void setNode(ECSNode node)
+	{
+		this.name = node.name;
+		this.address = node.address;
+		this.port = node.port;
+		this.lowerHash = node.lowerHash;
+		this.upperHash = node.upperHash;
+		this.state = node.state;
 	}
 }

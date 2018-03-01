@@ -9,20 +9,39 @@ import java.util.Vector;
 import java.util.Collection;
 import java.util.List;
 import org.apache.zookeeper.*;
+
+import common.KVMessage.StatusType;
+
 import ecs.*;
-import ecs.IECSNode;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+
+import javax.xml.bind.annotation.adapters.HexBinaryAdapter;
 
 public class ECSClient implements IECSClient, Watcher 
 {
 	static ZooKeeper zk;
 	final int zkport = 2181;
 	int servercount = 0;
+	int count = 0;
+	int capacity;
 	String zkhost = "127.0.0.1";
+	final String zkroot = "/";
+	List<String> servers;
+	List<String> addresses;
+	List<String> ports;
 	
-	ECSClient(List<String> names,List<String> addresses,List<String> ports){
+	ECSClient(List<String> names,List<String> addresses,List<String> ports)
+	{
+		this.addresses = addresses;
+		this.servers = names;
+		this.ports = ports;
+		this.capacity = names.size();
 		try {
 			zk = new ZooKeeper(zkhost+":"+zkport, 3000, this);
-		} catch (IOException e) {
+			
+			create("/", null);
+		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -52,8 +71,27 @@ public class ECSClient implements IECSClient, Watcher
 	}
     
     @Override
-    public IECSNode addNode(String cacheStrategy, int cacheSize) {
-        // TODO
+    public IECSNode addNode(String cacheStrategy, int cacheSize) 
+    {
+        String name = servers.remove(0);
+        String address = addresses.remove(0);
+        String serverport = ports.remove(0);
+        int port = Integer.parseInt(serverport);
+        
+        String value = address + ":" + serverport;
+        MessageDigest md;
+        String hash;
+        try 
+		{
+			md = MessageDigest.getInstance("MD5");
+			hash = (new HexBinaryAdapter()).marshal((md.digest(value.getBytes())));
+		} 
+		catch (NoSuchAlgorithmException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+			return null;
+		}
+        
     	Process proc;
     	String script = "script.sh";
 
@@ -63,8 +101,18 @@ public class ECSClient implements IECSClient, Watcher
     	} catch (IOException e) {
     	  e.printStackTrace();
     	}
-
-    	ECSNode node = new ECSNode();
+    	ECSNode node;
+    	if(count == 0)
+    	{
+    		node = new ECSNode(name, address, port, "00000000000000000000000000000000", "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF");
+    		setData(-1);
+    	}
+    	else
+    	{
+    		node = new ECSNode(name, address, port, "00000000000000000000000000000000", hash);
+    	}
+    	ECSNode node = new ECSNode(name, address, port, "00000000000000000000000000000000", "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF");
+    	count++;
     	return node;
         //return null;
     }
@@ -72,7 +120,12 @@ public class ECSClient implements IECSClient, Watcher
     @Override
     public Collection<IECSNode> addNodes(int count, String cacheStrategy, int cacheSize) {
         // TODO
-        return null;
+    	List<IECSNode> list = new Vector<IECSNode>();
+    	for(int i = 0; i < count; i++)
+    	{
+    		list.add(addNode(cacheStrategy, cacheSize));
+    	}
+        return list;
     }
 
     @Override
@@ -107,17 +160,19 @@ public class ECSClient implements IECSClient, Watcher
 
     public static void main(String[] args) {
         // TODO
-    		if(args.length != 1) {
-    			System.err.println("USAGE: java -jar m2-ecs.jar ecs.config");
-    			System.exit(2);
-    		}
+		if(args.length != 1) {
+			System.err.println("USAGE: java -jar m2-ecs.jar ecs.config");
+			System.exit(2);
+		}
     		
-    		List<String> names = new Vector<String>();
+    	List<String> names = new Vector<String>();
 		List<String> addresses = new Vector<String>();
 		List<String> ports = new Vector<String>();
+		int count = 0;
     		
     		// Parse ECS config file and put value inside list
-		try {
+		try 
+		{
 			String filename = args[0];
 			File file = new File(filename);
 			if(file.isFile())
@@ -136,13 +191,18 @@ public class ECSClient implements IECSClient, Watcher
 					// TODO if not needed, can combine address port here
 					addresses.add(st.nextToken());
 					ports.add(st.nextToken());
+					count++;
 				}
 				// TODO possibly add detection for duplicate name / address+port
 				
-			}else {
+			}
+			else 
+			{
 				System.err.println("File does not exist!");
 			}
-		} catch (IOException e) {
+		} 
+		catch (IOException e) 
+		{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
