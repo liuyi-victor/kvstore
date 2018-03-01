@@ -14,6 +14,7 @@ import org.apache.log4j.Logger;
 import common.*;
 import common.KVMessage.StatusType;
 import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 import javax.xml.bind.annotation.adapters.HexBinaryAdapter;
 import org.apache.zookeeper.*;
@@ -75,13 +76,20 @@ public class ClientConnection implements Runnable
 		toclient.key = key;
 		toclient.value = value;
 		
-		MessageDigest md = MessageDigest.getInstance("MD5");
-		String hash = (new HexBinaryAdapter()).marshal((md.digest(key.getBytes())));
-		if(!hashRange(hash))
-		{
-			toclient.status = StatusType.SERVER_NOT_RESPONSIBLE;
-		}
+		MessageDigest md;
+		try {
+			md = MessageDigest.getInstance("MD5");
 		
+			String hash = (new HexBinaryAdapter()).marshal((md.digest(key.getBytes())));
+		
+			if(!hashRange(hash))
+			{
+				toclient.status = StatusType.SERVER_NOT_RESPONSIBLE;
+			}
+		} catch (NoSuchAlgorithmException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 		int success;
 		
 		if(key.contains(" ")){

@@ -25,10 +25,6 @@ public class ECSClient implements IECSClient, Watcher
 	
 	ECSClient(List<String> names,List<String> addresses,List<String> ports){
 		try {
-			//
-			// PROBLEM!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-			//
-			// TODO zookeeper can't find org.slf4j.loggerfactory  
 			zk = new ZooKeeper(zkhost+":"+zkport, 3000, this);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
