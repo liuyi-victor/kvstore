@@ -8,6 +8,9 @@ import java.util.StringTokenizer;
 import java.util.Vector;
 import java.util.Collection;
 import java.util.List;
+
+import org.apache.log4j.*;
+import logger.LogSetup;
 import org.apache.zookeeper.*;
 import ecs.*;
 import ecs.IECSNode;
@@ -18,9 +21,14 @@ public class ECSClient implements IECSClient, Watcher
 	final int zkport = 2181;
 	int servercount = 0;
 	String zkhost = "127.0.0.1";
+	Logger logger = Logger.getRootLogger();
 	
 	ECSClient(List<String> names,List<String> addresses,List<String> ports){
 		try {
+			//
+			// PROBLEM!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+			//
+			// TODO zookeeper can't find org.slf4j.loggerfactory  
 			zk = new ZooKeeper(zkhost+":"+zkport, 3000, this);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -106,6 +114,12 @@ public class ECSClient implements IECSClient, Watcher
     }
 
     public static void main(String[] args) {
+    		try {
+				new LogSetup("logs/server.log", Level.ALL);
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
         // TODO
     		if(args.length != 1) {
     			System.err.println("USAGE: java -jar m2-ecs.jar ecs.config");
