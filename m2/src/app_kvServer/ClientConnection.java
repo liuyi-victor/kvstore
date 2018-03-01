@@ -7,7 +7,7 @@ import java.net.Socket;
 import java.util.*;
 import java.io.IOException;
 
-import logger.LogSetup;
+import org.apache.log4j.Logger;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
