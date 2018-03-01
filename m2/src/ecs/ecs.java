@@ -14,7 +14,6 @@ public class ecs implements Watcher
 	//Watcher watch;
 	public ecs()
 	{
-		//watch = new Watcher();
 		try {
 			zk = new ZooKeeper(zkhost+":"+zkport, 3000, this);
 		} catch (IOException e) {

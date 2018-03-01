@@ -7,6 +7,9 @@ import java.util.Collection;
 import org.apache.zookeeper.Watcher;
 import org.apache.zookeeper.ZooKeeper;
 
+import java.security.MessageDigest;
+import org.apache.zookeeper.*;
+import ecs.*;
 import ecs.IECSNode;
 
 public class ECSClient implements IECSClient, Watcher 
@@ -34,6 +37,11 @@ public class ECSClient implements IECSClient, Watcher
         return false;
     }
 
+    public void create(String path, byte[] data) throws KeeperException,InterruptedException 
+	{
+		this.zk.create(path, data, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
+	}
+    
     @Override
     public IECSNode addNode(String cacheStrategy, int cacheSize) {
         // TODO
@@ -47,6 +55,8 @@ public class ECSClient implements IECSClient, Watcher
     	  e.printStackTrace();
     	}
 
+    	ECSNode node = new ECSNode();
+    	return node;
         //return null;
     }
 

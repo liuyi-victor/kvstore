@@ -81,14 +81,15 @@ public class KVServer implements IKVServer, Runnable, Watcher, StatCallback {
             if (path != null && path.equals(znode)) 
             {
                 // Something has changed on the node, let's find out
-            		Stat stat;
-				try {
-					stat = zk.exists(znode, true);
-					byte metadata[] = zk.getData(znode, this, stat);
-				} catch (KeeperException | InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+            	try
+            	{
+	            	Stat stat = zk.exists(znode, true);
+	            	byte metadata[] = zk.getData(znode, this, stat);
+            	}
+            	catch(Exception ex)
+            	{
+            		ex.printStackTrace();
+            	}
             }
         }
 	}
