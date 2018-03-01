@@ -103,8 +103,9 @@ public class KVServer implements IKVServer, Runnable, Watcher, StatCallback {
 			{
 			    try 
 			    {
-					Socket client = server.accept();                
-					ClientConnection connection = new ClientConnection(client, cache);
+					Socket client = server.accept();
+					// TODO fill in "null" argument
+					ClientConnection connection = new ClientConnection(client, cache, null);
 					new Thread(connection).start();
 			
 					logger.info("Connected to " 
