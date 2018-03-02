@@ -13,8 +13,9 @@ import org.apache.zookeeper.data.Stat;
 
 import app_kvServer.IKVServer.ServerState;
 
-public class DataMonitor implements Watcher {
-
+public class DataMonitor// implements Watcher {
+{
+/*
     ZooKeeper zk;
 
     String znode;
@@ -35,25 +36,16 @@ public class DataMonitor implements Watcher {
         this.listener = listener;
         // Get things started by checking if the node exists. We are going
         // to be completely event driven
-        zk.exists(znode, true, this, null);
+        zk.exists(znode, this);
     }
 
-    /**
-     * Other classes use the DataMonitor by implementing this method
-     */
+ 
     public interface DataMonitorListener {
-        /**
-         * The existence status of the node has changed.
-         */
+
         void exists(byte data[]);
 
         void update(byte data[]);
-        /**
-         * The ZooKeeper session is no longer valid.
-         *
-         * @param rc
-         *                the ZooKeeper reason code
-         */
+        
         void closing();
     }
 
@@ -97,25 +89,26 @@ public class DataMonitor implements Watcher {
             }
         }
     }
-    /*
+    
     public void processResult(int rc, String path, Object ctx, Stat stat) {
         boolean exists;
-        switch (rc) {
-        case Code.Ok:
-            exists = true;
-            break;
-        case Code.NoNode:
-            exists = false;
-            break;
-        case Code.SessionExpired:
-        case Code.NoAuth:
-            dead = true;
-            listener.closing(rc);
-            return;
-        default:
-            // Retry errors
-            zk.exists(znode, true, this, null);
-            return;
+        switch (rc) 
+        {
+	        case Code.Ok:
+	            exists = true;
+	            break;
+	        case Code.NoNode:
+	            exists = false;
+	            break;
+	        case Code.SessionExpired:
+	        case Code.NoAuth:
+	            dead = true;
+	            listener.closing(rc);
+	            return;
+	        default:
+	            // Retry errors
+	            zk.exists(znode, true, this, null);
+	            return;
         }
 
         byte b[] = null;

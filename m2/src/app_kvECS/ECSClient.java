@@ -15,6 +15,7 @@ import java.util.List;
 import org.apache.log4j.*;
 import logger.LogSetup;
 import org.apache.zookeeper.*;
+import org.apache.zookeeper.data.Stat;
 
 import common.KVMessage.StatusType;
 
@@ -33,6 +34,8 @@ public class ECSClient implements IECSClient, Watcher
 	int capacity;
 	String zkhost = "127.0.0.1"; 
 	final String zkroot = "/";
+	final String minHash = "00000000000000000000000000000000";
+	final String maxHash = "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF";
 	List<String> servers;
 	List<String> addresses;
 	List<String> ports;
@@ -265,14 +268,18 @@ public class ECSClient implements IECSClient, Watcher
     	ECSNode node;
     	if(count == 0)
     	{
-    		node = new ECSNode(name, address, port, "00000000000000000000000000000000", "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF");
-    		setData(-1);
+    		node = new ECSNode(name, address, port, minHash, maxHash);
+    		
+    		//set the data of the root
+    		String data = name + "=" + minHash + ":" + maxHash;
+    		zk.setData(zkroot, data.getBytes(), -1);
     	}
     	else
     	{
-    		node = new ECSNode(name, address, port, "00000000000000000000000000000000", hash);
+    		Stat stat;
+    		byte metadata[] = zk.getData(zkroot, this, stat);
+    		node = new ECSNode(name, address, port, minHash, hash);
     	}
-    	ECSNode node = new ECSNode(name, address, port, "00000000000000000000000000000000", "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF");
     	count++;
     	return node;
         //return null;

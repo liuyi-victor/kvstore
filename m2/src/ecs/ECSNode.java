@@ -40,7 +40,7 @@ public class ECSNode implements IECSNode, Serializable
 			this.state = ServerState.SERVER_WRITE_LOCK;
 		}
 	}
-	public ECSNode(String name, String address, int port, String lowerHash, String upperHash, )
+	public ECSNode(String name, String address, int port, String lowerHash, String upperHash)
 	{
 		this.name = name;
 		this.address = address;

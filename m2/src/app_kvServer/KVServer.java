@@ -17,7 +17,8 @@ import org.apache.zookeeper.data.Stat;
 
 import ecs.*;
 
-public class KVServer implements IKVServer, Runnable, Watcher, StatCallback {
+public class KVServer implements IKVServer, Runnable, Watcher, StatCallback//, DataMonitor.DataMonitorListener {
+{
 
 	int serverport;
 	int cache_size;
@@ -61,6 +62,42 @@ public class KVServer implements IKVServer, Runnable, Watcher, StatCallback {
 		running = ServerState.SERVER_STOPPED;
 	}
 
+	public boolean initKVServer(String metadata, int cacheSize, String replacementStrategy) 
+	{
+		
+		try {
+			this.update(metadata);
+			
+			
+		} catch (Exception e) {
+			logger.error("Metadata could not be updated", e);
+			return false;
+		}
+		this.cache_size = cacheSize;
+		switch(replacementStrategy)
+		{
+			case "FIFO":
+				replacement = CacheStrategy.FIFO;
+				break;
+			case "LRU":
+				replacement = CacheStrategy.LRU;
+				//cache = new LRUCache(cacheSize);
+				break;
+			case "LFU":
+				replacement = CacheStrategy.LFU;
+				//cache = new LFUCache(cacheSize);
+				break;
+			default:
+				System.out.println("Error! Invalid argument <strategy>! Not a valid caching strategy. Available options are FIFO | LRU | LFU !");
+				System.out.println("Usage: Server <port> <cache_size> <strategy>!");
+				System.exit(1);
+				break;
+		
+	}
+	private update(String metadata)
+	{
+		
+	}
 	public void process(WatchedEvent event)
 	{
 		String path = event.getPath();
