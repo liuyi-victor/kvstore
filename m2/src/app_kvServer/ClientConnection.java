@@ -18,7 +18,8 @@ import java.security.NoSuchAlgorithmException;
 
 import javax.xml.bind.annotation.adapters.HexBinaryAdapter;
 import org.apache.zookeeper.*;
-import app_kvServer.IKVServer.*;
+import app_kvServer.*;
+import app_kvServer.KVServer.*;
 import ecs.*;
 
 public class ClientConnection implements Runnable
@@ -59,10 +60,10 @@ public class ClientConnection implements Runnable
 		}
 		else
 		{
-			if(meta.lowerHash.compareTo(hash) > 0 && meta.upperHash.compareTo(hash) < 0 )
-				return false;
-			else 
+			if((meta.lowerHash.compareTo(hash) > 0 && meta.upperHash.compareTo(hash) > 0) || (meta.lowerHash.compareTo(hash) < 0 && meta.upperHash.compareTo(hash) < 0))
 				return true;
+			else 
+				return false;
 		}
 	}
 	// TODO add comments

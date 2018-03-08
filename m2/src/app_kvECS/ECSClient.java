@@ -48,17 +48,19 @@ public class ECSClient implements IECSClient, Watcher
 	private static final String PROMPT = "ECSClient> ";
 
 	
-	ECSClient(List<String> names,List<String> addresses,List<String> ports)
+	ECSClient(List<String> names, List<String> addresses, List<String> ports)
 	{
 		this.addresses = addresses;
 		this.servers = names;
 		this.ports = ports;
 		this.capacity = names.size();
-		try {
+		try 
+		{
 			zk = new ZooKeeper(zkhost+":"+zkport, 3000, this);
 			
-			create("/", null);
-		} catch (Exception e) {
+			create(zkroot, null);
+		} 
+		catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -289,6 +291,7 @@ public class ECSClient implements IECSClient, Watcher
     public Collection<IECSNode> addNodes(int count, String cacheStrategy, int cacheSize) {
         // TODO
     	List<IECSNode> list = new Vector<IECSNode>();
+    	Vector<ECSNode> list = setupNodes(count, cacheStrategy, cacheSize);
     	for(int i = 0; i < count; i++)
     	{
     		list.add(addNode(cacheStrategy, cacheSize));
@@ -299,6 +302,12 @@ public class ECSClient implements IECSClient, Watcher
     @Override
     public Collection<IECSNode> setupNodes(int count, String cacheStrategy, int cacheSize) {
         // TODO
+    	
+    	for(int i = 0; i < count; i++)
+    	{
+    		String path = zkroot + this.servers.get(0);
+    		create(path);
+    	}
         return null;
     }
 

@@ -7,13 +7,7 @@ public interface IKVServer {
         LFU,
         FIFO
     };
-
-    public enum ServerState
-    {
-    	SERVER_STOPPED,         /* Server is stopped, no requests are processed */
-		SERVER_WRITE_LOCK,
-		SERVER_RUNNING
-    };
+    
     /**
      * Get the port number of the server
      * @return  port number

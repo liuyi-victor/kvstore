@@ -27,21 +27,40 @@ class Entry implements Serializable
 
 public class Database 
 {
-	
-	
 	private ReentrantReadWriteLock lock;
-	private final String path = "./storage/";
+	//private final String path = "./storage/";
+	private final String prefix = "./";
+	private String path;
 	private Logger logger = Logger.getRootLogger();
-	public Database()
+	private File directory;
+	public Database(String server)
 	{
 		lock = new ReentrantReadWriteLock(true);
-		File directory = new File(path);
+		this.path = prefix + server + "/";
+		this.directory = new File(path);
 		if(!directory.isDirectory())
 		{
 			if(!directory.mkdir()) {
 				logger.fatal("Storage directory does not exist and cannot be created!");
 			}
 		}
+	}
+	public String[] allKeys()
+	{
+		int total = this.directory.listFiles().length;
+		if(total <= 0)
+			return null;
+		String list[] = new String[total];
+		int i = 0;
+		for(File file : this.directory.listFiles())
+		{
+			if(file.isFile())
+			{
+				list[i] = file.getPath();
+				i++;
+			}
+		}
+		return list;
 	}
 	private long hash_function(String name)
 	{
@@ -63,19 +82,22 @@ public class Database
 	    return index;
 	    */
 	}
-	
 	/** 
 	 * Convert given key into ASCII and return as String
 	 * @param key
 	 * @return
 	 */
-	public String toASCII(String key) {
+	public String toASCII(String key) 
+	{
+		/*
 		StringBuilder str = new StringBuilder();
 		char[] letters = key.toCharArray();
 		for (char ch : letters) {
 			str.append((byte)ch);
 		}
 		return str.toString();
+		*/
+		return key;
 	}
 	
 	public String toFilename(String key) {

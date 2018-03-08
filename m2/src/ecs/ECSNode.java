@@ -1,7 +1,8 @@
 package ecs;
 
 import java.io.Serializable;
-import app_kvServer.IKVServer.*;
+import app_kvServer.*;
+import app_kvServer.KVServer.*;
 import org.apache.zookeeper.*;
 
 public class ECSNode implements IECSNode, Serializable
